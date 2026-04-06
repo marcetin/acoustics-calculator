@@ -1,0 +1,278 @@
+<div class="tab-summary">
+    <h3>Project Summary</h3>
+    
+    <div class="summary-grid">
+        <div class="summary-card">
+            <h4>Space Configuration</h4>
+            <div class="summary-item">
+                <label>Space Type:</label>
+                <span>{{.Project.SpaceType.DisplayName}}</span>
+            </div>
+            <div class="summary-item">
+                <label>Goal:</label>
+                <span>{{.Project.GoalType.DisplayName}}</span>
+            </div>
+            <div class="summary-item">
+                <label>Units:</label>
+                <span>{{.Project.Units}}</span>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <h4>Environmental Conditions</h4>
+            <div class="summary-item">
+                <label>Temperature:</label>
+                <span>{{printf "%.1f°C" .Project.TemperatureC}}</span>
+            </div>
+            <div class="summary-item">
+                <label>Humidity:</label>
+                <span>{{printf "%.1f%%" .Project.HumidityPercent}}</span>
+            </div>
+            <div class="summary-item">
+                <label>Speed of Sound:</label>
+                <span>{{printf "%.1f m/s" .Project.SpeedOfSound}}</span>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <h4>Project Information</h4>
+            <div class="summary-item">
+                <label>Created:</label>
+                <span>{{.Project.CreatedAt.Format "Jan 2, 2006 3:04 PM"}}</span>
+            </div>
+            <div class="summary-item">
+                <label>Last Updated:</label>
+                <span>{{.Project.UpdatedAt.Format "Jan 2, 2006 3:04 PM"}}</span>
+            </div>
+            <div class="summary-item">
+                <label>Project ID:</label>
+                <span class="project-id">{{.Project.ID}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-section">
+        <h4>Setup Progress</h4>
+        <div class="progress-list">
+            <div class="progress-item completed">
+                <div class="progress-icon">✓</div>
+                <div class="progress-text">
+                    <strong>Project created</strong>
+                    <span>Basic project information configured</span>
+                </div>
+            </div>
+            <div class="progress-item pending">
+                <div class="progress-icon">○</div>
+                <div class="progress-text">
+                    <strong>Geometry not configured yet</strong>
+                    <span>Define room dimensions and shape</span>
+                </div>
+            </div>
+            <div class="progress-item pending">
+                <div class="progress-icon">○</div>
+                <div class="progress-text">
+                    <strong>Surfaces not configured yet</strong>
+                    <span>Assign materials to walls, ceiling, and floor</span>
+                </div>
+            </div>
+            <div class="progress-item pending">
+                <div class="progress-icon">○</div>
+                <div class="progress-text">
+                    <strong>Sources not configured yet</strong>
+                    <span>Position speakers and sound sources</span>
+                </div>
+            </div>
+            <div class="progress-item pending">
+                <div class="progress-icon">○</div>
+                <div class="progress-text">
+                    <strong>Receivers not configured yet</strong>
+                    <span>Position listening points and audience areas</span>
+                </div>
+            </div>
+            <div class="progress-item pending">
+                <div class="progress-icon">○</div>
+                <div class="progress-text">
+                    <strong>Constraints not configured yet</strong>
+                    <span>Set treatment preferences and limitations</span>
+                </div>
+            </div>
+            <div class="progress-item pending">
+                <div class="progress-icon">○</div>
+                <div class="progress-text">
+                    <strong>Analysis not run yet</strong>
+                    <span>Run acoustic analysis to get recommendations</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="next-steps">
+        <h4>Next Steps</h4>
+        <p>To continue with your acoustic analysis, configure the room geometry by clicking on the <strong>Geometry</strong> tab above.</p>
+        <div class="step-actions">
+            <a href="/hx/projects/{{.Project.ID}}/tabs/geometry" 
+               class="btn btn-primary" 
+               hx-get="/hx/projects/{{.Project.ID}}/tabs/geometry"
+               hx-target="#tab-content"
+               hx-swap="innerHTML">
+                Configure Geometry
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.tab-summary h3 {
+    margin-bottom: 1.5rem;
+    color: var(--dark-color);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.summary-card h4 {
+    margin: 0 0 1rem 0;
+    color: var(--dark-color);
+    font-size: 1.1rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.summary-item:last-child {
+    margin-bottom: 0;
+}
+
+.summary-item label {
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+.summary-item span {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.project-id {
+    font-family: monospace;
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+}
+
+.progress-section {
+    margin-bottom: 2rem;
+}
+
+.progress-section h4 {
+    margin-bottom: 1rem;
+    color: var(--dark-color);
+}
+
+.progress-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.progress-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.progress-item.completed {
+    background-color: #f0f9f0;
+    border-color: #c3e6cb;
+}
+
+.progress-item.pending {
+    background-color: #f8f9fa;
+    border-color: var(--border-color);
+}
+
+.progress-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.progress-item.completed .progress-icon {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.progress-item.pending .progress-icon {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.progress-text {
+    flex: 1;
+}
+
+.progress-text strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--dark-color);
+}
+
+.progress-text span {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+}
+
+.next-steps {
+    padding: 1.5rem;
+    background-color: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: var(--border-radius);
+}
+
+.next-steps h4 {
+    margin: 0 0 0.75rem 0;
+    color: #1976d2;
+}
+
+.next-steps p {
+    margin: 0 0 1rem 0;
+    color: var(--dark-color);
+}
+
+.step-actions {
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .progress-item {
+        padding: 0.75rem;
+    }
+}
+</style>

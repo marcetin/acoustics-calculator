@@ -1,0 +1,276 @@
+{{define "content"}}
+<div class="page-header">
+    <h2>Create New Project</h2>
+    <p>Set up your acoustic analysis project by providing basic information about your space.</p>
+</div>
+
+{{if .Error}}
+<div class="flash flash-danger">
+    {{.Error}}
+</div>
+{{end}}
+
+<form method="POST" action="/projects" class="project-form">
+    <div class="form-section">
+        <h3>Basic Information</h3>
+        
+        <div class="form-group">
+            <label for="name">Project Name *</label>
+            <input type="text" id="name" name="name" class="form-control" 
+                   value="{{if .Form}}{{.Form.Name}}{{end}}" required>
+            <small class="form-help">Give your project a descriptive name</small>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Space Configuration</h3>
+        
+        <div class="form-group">
+            <label for="space_type">Space Type *</label>
+            <select id="space_type" name="space_type" class="form-control" required>
+                <option value="">Select space type...</option>
+                {{range .SpaceTypes}}
+                <option value="{{.String}}" 
+                        {{if $.Form}}{{if eq $.Form.SpaceType .String}}selected{{end}}{{end}}>
+                    {{.DisplayName}}
+                </option>
+                {{end}}
+            </select>
+            <small class="form-help">Choose the type of space you're analyzing</small>
+        </div>
+
+        <div class="space-type-descriptions">
+            <div class="description-box" data-type="STUDIO">
+                <strong>Studio / Control Room:</strong> Critical listening environment with symmetry and early reflection control
+            </div>
+            <div class="description-box" data-type="HIFI">
+                <strong>Hi-fi Listening Room:</strong> Optimized listening room for imaging and spaciousness
+            </div>
+            <div class="description-box" data-type="PUBLIC">
+                <strong>Public Space:</strong> Audience-focused space with coverage and clarity requirements
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="goal_type">Goal Type *</label>
+            <select id="goal_type" name="goal_type" class="form-control" required>
+                <option value="">Select goal...</option>
+                {{range .GoalTypes}}
+                <option value="{{.String}}" 
+                        {{if $.Form}}{{if eq $.Form.GoalType .String}}selected{{end}}{{end}}>
+                    {{.DisplayName}}
+                </option>
+                {{end}}
+            </select>
+            <small class="form-help">What is the primary purpose of this space?</small>
+        </div>
+
+        <div class="goal-type-descriptions">
+            <div class="description-box" data-type="MIXING">
+                <strong>Mixing:</strong> Music mixing and production
+            </div>
+            <div class="description-box" data-type="MASTERING">
+                <strong>Mastering:</strong> Final audio mastering
+            </div>
+            <div class="description-box" data-type="HIFI_STEREO">
+                <strong>Hi-fi Stereo:</strong> Critical stereo listening
+            </div>
+            <div class="description-box" data-type="SPEECH">
+                <strong>Speech:</strong> Speech intelligibility and clarity
+            </div>
+            <div class="description-box" data-type="MUSIC">
+                <strong>Music:</strong> Music performance and enjoyment
+            </div>
+            <div class="description-box" data-type="MULTIPURPOSE">
+                <strong>Multipurpose:</strong> Multi-use space flexibility
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Environmental Conditions</h3>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="units">Units</label>
+                <select id="units" name="units" class="form-control">
+                    {{range .Units}}
+                    <option value="{{.String}}" 
+                            {{if $.Form}}{{if eq $.Form.Units .String}}selected{{end}}{{else if eq .String "METERS"}}selected{{end}}>
+                        {{.String}}
+                    </option>
+                    {{end}}
+                </select>
+                <small class="form-help">Measurement units for dimensions</small>
+            </div>
+
+            <div class="form-group">
+                <label for="temperature_c">Temperature (°C)</label>
+                <input type="number" id="temperature_c" name="temperature_c" 
+                       class="form-control" step="0.1" min="-273.15" max="100"
+                       value="{{if .Form}}{{.Form.TemperatureC}}{{else}}20.0{{end}}">
+                <small class="form-help">Air temperature affects speed of sound</small>
+            </div>
+
+            <div class="form-group">
+                <label for="humidity_percent">Humidity (%)</label>
+                <input type="number" id="humidity_percent" name="humidity_percent" 
+                       class="form-control" step="0.1" min="0" max="100"
+                       value="{{if .Form}}{{.Form.HumidityPercent}}{{else}}50.0{{end}}">
+                <small class="form-help">Relative humidity percentage</small>
+            </div>
+
+            <div class="form-group">
+                <label for="speed_of_sound">Speed of Sound (m/s)</label>
+                <input type="number" id="speed_of_sound" name="speed_of_sound" 
+                       class="form-control" step="0.1" min="0" max="1000"
+                       value="{{if .Form}}{{.Form.SpeedOfSound}}{{else}}343.0{{end}}">
+                <small class="form-help">Speed of sound in air (default: 343 m/s at 20°C)</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Create Project</button>
+        <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+<script>
+document.getElementById('space_type').addEventListener('change', function() {
+    var descriptions = document.querySelectorAll('.space-type-descriptions .description-box');
+    descriptions.forEach(function(box) {
+        box.style.display = 'none';
+    });
+    var selected = document.querySelector('.space-type-descriptions [data-type="' + this.value + '"]');
+    if (selected) {
+        selected.style.display = 'block';
+    }
+});
+
+document.getElementById('goal_type').addEventListener('change', function() {
+    var descriptions = document.querySelectorAll('.goal-type-descriptions .description-box');
+    descriptions.forEach(function(box) {
+        box.style.display = 'none';
+    });
+    var selected = document.querySelector('.goal-type-descriptions [data-type="' + this.value + '"]');
+    if (selected) {
+        selected.style.display = 'block';
+    }
+});
+
+// Show initial descriptions
+document.getElementById('space_type').dispatchEvent(new Event('change'));
+document.getElementById('goal_type').dispatchEvent(new Event('change'));
+</script>
+
+<style>
+.space-type-descriptions .description-box,
+.goal-type-descriptions .description-box {
+    display: none;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-left: 3px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.form-section h3 {
+    margin-bottom: 1rem;
+    color: var(--dark-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.form-help {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+}
+
+.project-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.project-item:last-child {
+    border-bottom: none;
+}
+
+.project-item h4 {
+    margin: 0 0 0.5rem 0;
+}
+
+.project-item h4 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.project-item h4 a:hover {
+    color: var(--primary-color);
+}
+
+.project-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+}
+
+.badge-studio {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.badge-hifi {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.badge-public {
+    background-color: #e8f5e8;
+    color: #388e3c;
+}
+
+.badge-secondary {
+    background-color: #f5f5f5;
+    color: #6c757d;
+}
+
+.project-date {
+    color: var(--secondary-color);
+    margin-left: auto;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.form-actions .btn {
+    margin-right: 1rem;
+}
+</style>
+{{end}}

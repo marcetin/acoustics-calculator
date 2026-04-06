@@ -1,0 +1,340 @@
+<div class="tab-constraints">
+    <div class="empty-state">
+        <div class="empty-icon">⚙️</div>
+        <h3>Treatment Constraints</h3>
+        <p class="empty-description">
+            Define limitations and preferences for acoustic treatment to get personalized 
+            recommendations that fit your space, budget, and aesthetic requirements.
+        </p>
+        
+        <div class="coming-soon">
+            <h4>Coming in Phase 2</h4>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">📏</div>
+                    <div class="feature-content">
+                        <strong>Physical Constraints</strong>
+                        <span>Maximum panel depth, available wall space, mounting restrictions</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">💰</div>
+                    <div class="feature-content">
+                        <strong>Budget Classes</strong>
+                        <span>Basic, standard, and premium treatment options</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-content">
+                        <strong>Treatment Preferences</strong>
+                        <span>Balance between diffusion and absorption</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚖️</div>
+                    <div class="feature-content">
+                        <strong>Symmetry Requirements</strong>
+                        <span>Enforce symmetrical treatment for critical listening spaces</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="what-youll-configure">
+            <h4>What You'll Configure</h4>
+            <ul>
+                <li><strong>Maximum Panel Depth:</strong> How deep treatment panels can be</li>
+                <li><strong>Allowed Surfaces:</strong> Which walls/ceilings can receive treatment</li>
+                <li><strong>Forbidden Areas:</strong> Windows, doors, and other unavailable spaces</li>
+                <li><strong>Symmetry Rules:</strong> Left-right treatment symmetry requirements</li>
+                <li><strong>Budget Class:</strong> Basic, standard, or premium treatment options</li>
+                <li><strong>Treatment Mode:</strong> Diffusion-focused, absorption-focused, or balanced</li>
+            </ul>
+        </div>
+
+        <div class="space-specific">
+            <h4>Space-Specific Considerations</h4>
+            <div class="space-cards">
+                <div class="space-card studio">
+                    <h5>🎛️ Studio / Control Room</h5>
+                    <ul>
+                        <li>Enforce left-right symmetry</li>
+                        <li>Avoid near-field diffusion</li>
+                        <li>Control first reflections</li>
+                        <li>Precision treatment placement</li>
+                    </ul>
+                </div>
+                <div class="space-card hifi">
+                    <h5>🎧 Hi-Fi Listening Room</h5>
+                    <ul>
+                        <li>Balance diffusion and absorption</li>
+                        <li>Focus on rear wall treatment</li>
+                        <li>Maintain spaciousness</li>
+                        <li>Flexible placement options</li>
+                    </ul>
+                </div>
+                <div class="space-card public">
+                    <h5>🏛️ Public Space</h5>
+                    <ul>
+                        <li>Audience coverage priority</li>
+                        <li>Speech intelligibility focus</li>
+                        <li>Large area treatment</li>
+                        <li>Distributed approach</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="prerequisites">
+            <h4>Prerequisites</h4>
+            <div class="prerequisite-item">
+                <div class="prereq-icon">📐</div>
+                <div class="prereq-content">
+                    <strong>Complete Room Setup</strong>
+                    <p>Geometry, surfaces, sources, and receivers should be configured for optimal constraint recommendations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tab-constraints {
+    max-width: 800px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.empty-state h3 {
+    margin: 0 0 1rem 0;
+    color: var(--dark-color);
+    font-size: 1.5rem;
+}
+
+.empty-description {
+    margin: 0 0 2rem 0;
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.coming-soon {
+    background: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.coming-soon h4 {
+    margin: 0 0 1rem 0;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.feature-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.feature-content {
+    flex: 1;
+}
+
+.feature-content strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--dark-color);
+}
+
+.feature-content span {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+}
+
+.what-youll-configure {
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.what-youll-configure h4 {
+    margin: 0 0 1rem 0;
+    color: var(--dark-color);
+    text-align: center;
+}
+
+.what-youll-configure ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.what-youll-configure li {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.what-youll-configure li:last-child {
+    border-bottom: none;
+}
+
+.what-youll-configure li strong {
+    color: var(--dark-color);
+}
+
+.space-specific {
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.space-specific h4 {
+    margin: 0 0 1rem 0;
+    color: var(--dark-color);
+    text-align: center;
+}
+
+.space-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.space-card {
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.space-card.studio {
+    background-color: #e3f2fd;
+    border-color: #bbdefb;
+}
+
+.space-card.hifi {
+    background-color: #f3e5f5;
+    border-color: #e1bee7;
+}
+
+.space-card.public {
+    background-color: #e8f5e8;
+    border-color: #c8e6c8;
+}
+
+.space-card h5 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+    color: var(--dark-color);
+}
+
+.space-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.space-card li {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--secondary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.space-card li::before {
+    content: "•";
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.prerequisites {
+    text-align: left;
+}
+
+.prerequisites h4 {
+    margin: 0 0 1rem 0;
+    color: var(--dark-color);
+    text-align: center;
+}
+
+.prerequisite-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: var(--border-radius);
+}
+
+.prereq-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.prereq-content strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #856404;
+}
+
+.prereq-content p {
+    margin: 0;
+    color: #856404;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .empty-state {
+        padding: 1.5rem 0.5rem;
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+    }
+    
+    .feature-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .space-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .prerequisite-item {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>

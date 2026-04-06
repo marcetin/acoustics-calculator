@@ -1,0 +1,52 @@
+{{define "content"}}
+<div class="page-header">
+    <h2>Dashboard</h2>
+    <p>Welcome to Acoustics Calculator - Professional acoustic analysis and diffuser placement recommendations.</p>
+</div>
+
+<div class="actions">
+    <a href="/projects/new" class="btn btn-primary">Create New Project</a>
+</div>
+
+<div class="dashboard-grid">
+    <div class="card">
+        <h3>Recent Projects</h3>
+        <div class="project-list">
+            {{if .Projects}}
+                {{range .Projects}}
+                <div class="project-item">
+                    <h4><a href="/projects/{{.ID}}">{{.Name}}</a></h4>
+                    <div class="project-meta">
+                        <span class="badge badge-{{.SpaceType}}">{{.SpaceType.DisplayName}}</span>
+                        <span class="badge badge-secondary">{{.GoalType.DisplayName}}</span>
+                        <span class="project-date">Created {{.CreatedAt.Format "Jan 2, 2006"}}</span>
+                    </div>
+                </div>
+                {{end}}
+            {{else}}
+                <p>No projects yet. <a href="/projects/new">Create your first project</a> to get started.</p>
+            {{end}}
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Quick Start</h3>
+        <ul class="feature-list">
+            <li><strong>Studio Analysis:</strong> Optimize control rooms and mixing spaces</li>
+            <li><strong>Hi-Fi Rooms:</strong> Perfect listening environments for audiophiles</li>
+            <li><strong>Public Spaces:</strong> Acoustic treatment for larger venues</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Features</h3>
+        <ul class="feature-list">
+            <li>Rectangular room modal analysis</li>
+            <li>Early reflection calculations</li>
+            <li>Reverberation time estimation</li>
+            <li>Diffuser placement recommendations</li>
+            <li>Material absorption coefficients</li>
+        </ul>
+    </div>
+</div>
+{{end}}
