@@ -40,6 +40,85 @@ func NewAnalysisService(
 	}
 }
 
+type AnalysisReadiness struct {
+	Ready    bool
+	Reason   string
+	Warnings []string
+}
+
+func (s *AnalysisService) CanRunAnalysis(ctx context.Context, projectID string) (*AnalysisReadiness, error) {
+	project, err := s.projectRepo.GetByID(ctx, projectID)
+	if err != nil {
+		return &AnalysisReadiness{Ready: false, Reason: "Project not found"}, nil
+	}
+
+	geometry, err := s.geometryRepo.GetByProjectID(ctx, projectID)
+	if err != nil {
+		return &AnalysisReadiness{Ready: false, Reason: "Geometry not found"}, nil
+	}
+
+	if geometry.GeometryType != domain.GeometryTypeShoebox {
+		return &AnalysisReadiness{
+			Ready:  false,
+			Reason: "PHASE 3 analysis supports SHOEBOX geometry only",
+		}, nil
+	}
+
+	sources, err := s.sourceRepo.ListByProjectID(ctx, projectID)
+	if err != nil || len(sources) == 0 {
+		return &AnalysisReadiness{Ready: false, Reason: "At least one source is required"}, nil
+	}
+
+	receivers, err := s.receiverRepo.ListByProjectID(ctx, projectID)
+	if err != nil || len(receivers) == 0 {
+		return &AnalysisReadiness{Ready: false, Reason: "At least one receiver is required"}, nil
+	}
+
+	warnings := []string{}
+	if project.SpaceType == domain.SpaceTypePublic {
+		warnings = append(warnings, "PUBLIC profile: acoustic analysis uses simplified heuristics and is provisional in V1")
+	}
+
+	return &AnalysisReadiness{Ready: true, Warnings: warnings}, nil
+}
+
+func (s *AnalysisService) IsAnalysisStale(ctx context.Context, projectID string, analysisRun *domain.AnalysisRun) (bool, error) {
+	geometry, err := s.geometryRepo.GetByProjectID(ctx, projectID)
+	if err != nil {
+		return false, nil
+	}
+
+	if geometry.UpdatedAt.After(analysisRun.CreatedAt) {
+		return true, nil
+	}
+
+	sources, err := s.sourceRepo.ListByProjectID(ctx, projectID)
+	if err != nil {
+		return false, nil
+	}
+	for _, source := range sources {
+		if source.UpdatedAt.After(analysisRun.CreatedAt) {
+			return true, nil
+		}
+	}
+
+	receivers, err := s.receiverRepo.ListByProjectID(ctx, projectID)
+	if err != nil {
+		return false, nil
+	}
+	for _, receiver := range receivers {
+		if receiver.UpdatedAt.After(analysisRun.CreatedAt) {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (s *AnalysisService) GetLatestByProject(ctx context.Context, projectID string) (*domain.AnalysisRun, error) {
+	return s.analysisRepo.GetLatestByProject(ctx, projectID)
+}
+
 func (s *AnalysisService) RunAnalysis(ctx context.Context, projectID string) (*domain.AnalysisRun, error) {
 	project, err := s.projectRepo.GetByID(ctx, projectID)
 	if err != nil {

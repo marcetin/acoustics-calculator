@@ -15,6 +15,7 @@ type Repositories struct {
 	Analysis   *AnalysisRepository
 	Diffuser   *DiffuserRepository
 	Placement  *PlacementRepository
+	Job        *JobRepository
 }
 
 func NewRepositories(db *sql.DB) *Repositories {
@@ -29,5 +30,6 @@ func NewRepositories(db *sql.DB) *Repositories {
 		Analysis:   NewAnalysisRepository(db),
 		Diffuser:   NewDiffuserRepository(db),
 		Placement:  NewPlacementRepository(db),
+		Job:        NewJobRepository(db),
 	}
 }

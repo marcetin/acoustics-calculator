@@ -317,17 +317,79 @@ This document outlines the phased development approach for the Acoustics Calcula
 
 ---
 
-## PHASE 5 - Job System + Results UI + Public Profile
+## PHASE 5 - Job System + Results UI + Public Profile Polish ✅ COMPLETED
 
 **Goal**: Complete UX for analysis execution and results.
 
-### Planned Features
-- ✅ Background job processing
-- ✅ Real-time status updates
-- ✅ Results dashboard
-- ✅ Export functionality
-- ✅ Public space heuristics
-- ✅ Report generation
+### What Was Implemented
+- ✅ In-process job tracking with persistence
+- ✅ Job-backed analysis execution
+- ✅ Job-backed placement generation
+- ✅ HTMX polling for job status updates
+- ✅ Job status panel with progress bar
+- ✅ Results UI consolidation
+- ✅ Stale-state detection for analysis and placements
+- ✅ PUBLIC profile warnings in both analysis and placements
+- ✅ Empty states for no analysis/placements
+- ✅ Unit tests for job lifecycle
+
+### Key Features
+- **Job Model**: JobKind (ANALYSIS, PLACEMENTS), JobStatus (QUEUED, RUNNING, COMPLETED, FAILED), progress tracking
+- **Job Phases**: Analysis (validating_inputs, loading_project_data, computing_modes, computing_rt, computing_reflections, persisting_results), Placements (validating_inputs, loading_analysis_context, extracting_candidates, scoring_candidates, applying_veto, assigning_diffusers, synthesizing_layouts, persisting_results)
+- **Job Service**: CreateJob, StartJob, UpdateJobProgress, CompleteJob, FailJob, GetJob, GetLatestByProject, GetLatestActiveByProject, GetLatestByProjectAndKind
+- **HTMX Polling**: Job status panel polls every 1 second while running, auto-refreshes on completion
+- **Stale Detection**: Analysis stale if geometry/sources/receivers updated after last analysis, Placements stale if new analysis exists after last placement generation
+- **PUBLIC Profile**: Explicit warnings in readiness checks for both analysis and placements
+- **Empty States**: Clear messaging when no analysis run exists or no placements generated
+- **Readiness Checks**: CanRunAnalysis checks geometry, sources, receivers, SHOEBOX type; CanGeneratePlacements checks completed analysis with reflections
+
+### Technical Implementation
+- Job persistence in SQLite with indexes on project_id, status, kind, created_at
+- Goroutine-based execution for analysis and placement jobs
+- Progress updates at key phases (10%, 20%, 30%, 50%, 60%, 70%, 80%, 90%, 100%)
+- Stale check compares UpdatedAt of geometry/sources/receivers with AnalysisRun.CreatedAt
+- Stale check compares AnalysisRun.CreatedAt with latest PlacementCandidate.CreatedAt
+- Job status panel shows status badge, phase, progress bar, message, error message
+- HTMX hx-trigger="every 1s" for polling, hx-swap="outerHTML" for refresh
+
+### Limitations
+- **In-Process Only**: No distributed workers or external queues
+- **No WebSockets**: HTMX polling only
+- **Simple Stale Detection**: Timestamp-based, not input hash-based
+- **PUBLIC Profile**: Still provisional with simplified heuristics
+- **No Re-simulation**: Does not re-run analysis after treatment
+- **Goroutine Lifecycle**: Simple goroutines without advanced error recovery
+
+### Domain Models Added
+- Job - Job tracking with ID, ProjectID, Kind, Status, Phase, ProgressPercent, Message, ErrorMessage, CreatedAt, StartedAt, FinishedAt
+- AnalysisReadiness - Ready, Reason, Warnings
+
+### Database Migrations
+- 007_phase5_jobs.sql - jobs table with indexes
+
+### Routes Added
+- GET /hx/projects/{id}/jobs/{jobID}/status - Job status polling
+
+### Files Added
+- internal/domain/job.go - Job domain model
+- internal/repo/job_repo.go - Job repository
+- internal/service/job_service.go - Job service with job execution methods
+- internal/http/handlers/jobs.go - Jobs handler
+- internal/service/job_service_test.go - Job lifecycle tests
+- templates/partials/job_status.html - Job status panel template
+- migrations/007_phase5_jobs.sql - Jobs table migration
+
+### Files Modified
+- internal/repo/repositories.go - Added JobRepository
+- internal/app/app.go - Added JobService
+- internal/http/router.go - Added jobs handler and job status route
+- internal/http/handlers/analysis.go - Updated RunAnalysis to use job system
+- internal/http/handlers/placements.go - Updated GeneratePlacements to use job system
+- internal/http/handlers/projects.go - Load active jobs and stale state for tabs
+- internal/service/analysis_service.go - Added CanRunAnalysis, IsAnalysisStale, GetLatestByProject
+- internal/service/placement_service.go - Added ArePlacementsStale, updated PUBLIC warning
+- templates/partials/tab_analysis.html - Job status panel, stale warning, empty state, readiness warnings
+- templates/partials/tab_placements.html - Job status panel, stale warning, readiness warnings functionality
 
 ---
 
@@ -373,24 +435,25 @@ migrations/        - Database schema
 
 ## Current Status
 
-**Phase 4 Complete** ✅
+**Phase 5 Complete** ✅
 
-The application now provides a complete treatment recommendation system with:
-- Candidate extraction from reflection analysis
-- Scoring and ranking with weighted components
-- Veto logic for mountability, depth, nearfield, first-reflection
-- Diffuser type assignment (QRD_1D, QRD_2D, CUSTOM)
-- Simple layout synthesis for panel coordinates
-- Placement persistence linked to AnalysisRun
-- Placements UI with prerequisites and results
-- Profile-specific rules (STUDIO, HIFI, PUBLIC)
-- Unit tests for scoring, veto, catalog, layout
+The application now provides a complete job tracking and results experience with:
+- In-process job tracking with persistence
+- Job-backed analysis execution with progress updates
+- Job-backed placement generation with progress updates
+- HTMX polling for real-time job status
+- Job status panel with progress bar and phases
+- Stale-state detection for analysis and placements
+- PUBLIC profile warnings in analysis and placements
+- Empty states for no analysis/placements
+- Unit tests for job lifecycle
 
-**Ready for**: Phase 5 - Job System + Results UI + Public Profile
+**Ready for**: Phase 6 - Reports + Polish
 
-The treatment recommendation engine is complete and ready for UX improvements and async processing. Users can now:
-- Generate treatment recommendations based on acoustic analysis
-- View DIFFUSER, ABSORBER_RECOMMENDED, and REJECT decisions
-- See scoring, confidence, and reasons for each candidate
-- Review diffuser type assignments and target bands
-- Regenerate placements after new analysis runs
+The job tracking system is complete and ready for export capabilities and final polish. Users can now:
+- Run analysis as tracked jobs with progress updates
+- Generate placements as tracked jobs with progress updates
+- See real-time job status with progress bar
+- View stale warnings when inputs change
+- See clear PUBLIC profile warnings
+- Regenerate jobs safely without confusing stale UI state

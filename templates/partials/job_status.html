@@ -1,0 +1,152 @@
+<div class="job-status-panel">
+    <h4>Job Status</h4>
+    <div class="job-details">
+        <div class="job-item">
+            <label>Status:</label>
+            <span class="status-badge {{if eq .Status "COMPLETED"}}success{{else if eq .Status "FAILED"}}error{{else if eq .Status "RUNNING"}}running{{else}}pending{{end}}">
+                {{.Status}}
+            </span>
+        </div>
+        <div class="job-item">
+            <label>Phase:</label>
+            <span>{{.Phase}}</span>
+        </div>
+        <div class="job-item">
+            <label>Progress:</label>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{printf "%d" .ProgressPercent}}%"></div>
+            </div>
+            <span class="progress-text">{{printf "%d" .ProgressPercent}}%</span>
+        </div>
+        <div class="job-item">
+            <label>Message:</label>
+            <span>{{.Message}}</span>
+        </div>
+        {{if .ErrorMessage}}
+        <div class="job-item error">
+            <label>Error:</label>
+            <span>{{.ErrorMessage}}</span>
+        </div>
+        {{end}}
+    </div>
+    {{if eq .Status "RUNNING"}}
+    <div class="job-polling" hx-get="/hx/projects/{{$.Project.ID}}/jobs/{{.ID}}/status"
+         hx-trigger="every 1s"
+         hx-swap="outerHTML"
+         hx-target="this">
+        <span class="polling-indicator">Updating...</span>
+    </div>
+    {{end}}
+</div>
+
+<style>
+.job-status-panel {
+    background: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.job-status-panel h4 {
+    margin: 0 0 1rem 0;
+    color: var(--dark-color);
+}
+
+.job-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.job-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.job-item label {
+    font-weight: 600;
+    color: var(--secondary-color);
+    min-width: 80px;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--border-radius);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.running {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-badge.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    min-width: 50px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.job-item.error {
+    color: #721c24;
+}
+
+.job-polling {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.polling-indicator {
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .job-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .job-item label {
+        min-width: auto;
+    }
+
+    .progress-bar {
+        width: 100%;
+    }
+}
+</style>

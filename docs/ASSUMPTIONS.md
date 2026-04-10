@@ -127,6 +127,19 @@ This document captures the technical assumptions and design decisions made durin
 - **Rationale**: Public-space acoustics require different approach, but simplified for V1
 - **Trade-offs**: Recommendations may not be optimal for complex public spaces
 
+### Job System
+- **Assumption**: In-process goroutine execution is sufficient for V1 job tracking
+- **Rationale**: Simple, no external dependencies, adequate for single-server deployment
+- **Trade-offs**: No distributed scaling, no advanced error recovery, no job persistence across restarts
+
+- **Assumption**: HTMX polling at 1-second intervals provides adequate UX for job status updates
+- **Rationale**: Simple implementation, no WebSocket infrastructure, acceptable for short-running jobs
+- **Trade-offs**: Not real-time, may have latency, adds HTTP request overhead
+
+- **Assumption**: Timestamp-based stale detection is sufficient for detecting outdated results
+- **Rationale**: Simple implementation, no input hash complexity, adequate for typical usage patterns
+- **Trade-offs**: May miss some edge cases where inputs change without timestamp updates, less precise than hash-based detection
+
 ---
 
 ## User Interface Assumptions

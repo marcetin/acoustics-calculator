@@ -43,6 +43,7 @@ type Services struct {
 	ConstraintService *service.ConstraintService
 	AnalysisService   *service.AnalysisService
 	PlacementService  *service.PlacementService
+	JobService        *service.JobService
 }
 
 func New() *App {
@@ -73,6 +74,7 @@ func (a *App) Bootstrap() error {
 		ConstraintService: service.NewConstraintService(a.Repos.Constraint),
 		AnalysisService:   service.NewAnalysisService(a.Repos.Analysis, a.Repos.Project, a.Repos.Geometry, a.Repos.Surface, a.Repos.Source, a.Repos.Receiver, a.Repos.Material),
 		PlacementService:  service.NewPlacementService(a.Repos.Placement, a.Repos.Project, a.Repos.Geometry, a.Repos.Surface, a.Repos.Analysis, a.Repos.Diffuser, a.Repos.Constraint),
+		JobService:        service.NewJobService(a.Repos.Job),
 	}
 
 	if err := a.loadTemplates(); err != nil {

@@ -110,7 +110,7 @@ migrations/        - Database migration files
 
 ## MVP Scope
 
-The current MVP (Phase 4 Complete) implements:
+The current MVP (Phase 5 Complete) implements:
 
 - ✅ Project management with space type configuration
 - ✅ Shoebox room geometry with automatic surface generation
@@ -138,12 +138,20 @@ The current MVP (Phase 4 Complete) implements:
 - ✅ Placements UI with results
 - ✅ Profile-specific rules (STUDIO, HIFI, PUBLIC)
 - ✅ Unit tests for scoring, veto, catalog, layout
+- ✅ In-process job tracking with persistence
+- ✅ Job-backed analysis execution
+- ✅ Job-backed placement generation
+- ✅ HTMX polling for job status updates
+- ✅ Job status panel with progress bar
+- ✅ Stale-state detection for analysis and placements
+- ✅ PUBLIC profile warnings in analysis and placements
+- ✅ Empty states for no analysis/placements
+- ✅ Unit tests for job lifecycle
 
-**Coming in Phase 5**:
-- Background job processing
-- Real-time status updates
-- Enhanced results UI
-- Public profile improvements
+**Coming in Phase 6**:
+- JSON/CSV export
+- HTML reports
+- Final UX polish
 
 ## Future Enhancements
 

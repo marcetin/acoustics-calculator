@@ -1,7 +1,9 @@
 <div class="tab-placements">
     <h3>Treatment Placements</h3>
 
-    {{if not $.PlacementReadiness.Ready}}
+    {{if $.ActivePlacementJob}}
+    {{template "job_status.html" $.ActivePlacementJob}}
+    {{else if not $.PlacementReadiness.Ready}}
     <div class="prerequisites">
         <h4>Placement Prerequisites</h4>
         <div class="prerequisite-item">
@@ -28,9 +30,18 @@
         <form method="POST" action="/projects/{{$.Project.ID}}/placements/generate">
             <button type="submit" class="btn btn-primary btn-large">Generate Placements</button>
         </form>
-        <p class="placement-info">Generate treatment recommendations based on latest acoustic analysis.</p>
+        <p class="placement-info">Generate treatment recommendations based on the latest analysis results.</p>
     </div>
     {{else}}
+    {{if $.PlacementsStale}}
+    <div class="stale-warning">
+        <div class="stale-icon">⚠️</div>
+        <div class="stale-content">
+            <strong>Placements May Be Outdated</strong>
+            <p>A new analysis run exists after these placements were generated. Regenerate placements to see updated treatment recommendations.</p>
+        </div>
+    </div>
+    {{end}}
     <div class="placement-summary">
         <div class="summary-header">
             <h4>Latest Placements</h4>
@@ -316,6 +327,33 @@
 
 .data-table tbody tr:last-child td {
     border-bottom: none;
+}
+
+.stale-warning {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.stale-icon {
+    font-size: 1.5rem;
+}
+
+.stale-content strong {
+    display: block;
+    color: #856404;
+    margin-bottom: 0.25rem;
+}
+
+.stale-content p {
+    margin: 0;
+    color: #856404;
+    font-size: 0.875rem;
 }
 
 @media (max-width: 768px) {

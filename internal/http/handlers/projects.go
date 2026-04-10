@@ -216,17 +216,32 @@ func (h *ProjectHandler) ShowTab(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if tabName == "analysis" {
-		latestRun, err := h.app.Services.AnalysisService.GetLatestRun(r.Context(), projectID)
+		latestRun, err := h.app.Services.AnalysisService.GetLatestByProject(r.Context(), projectID)
 		if err == nil && latestRun != nil {
 			metrics, err := latestRun.GetMetrics()
 			if err == nil {
 				data["AnalysisRun"] = latestRun
 				data["AnalysisMetrics"] = metrics
+
+				isStale, err := h.app.Services.AnalysisService.IsAnalysisStale(r.Context(), projectID, latestRun)
+				if err == nil {
+					data["AnalysisStale"] = isStale
+				}
 			}
 		}
 
 		data["Geometry"] = geometry
 		data["ReadyForAnalysis"] = geometry != nil
+
+		readiness, err := h.app.Services.AnalysisService.CanRunAnalysis(r.Context(), projectID)
+		if err == nil {
+			data["AnalysisReadiness"] = readiness
+		}
+
+		activeJob, err := h.app.Services.JobService.GetLatestActiveByProject(r.Context(), projectID)
+		if err == nil && activeJob != nil && activeJob.Kind == domain.JobKindAnalysis {
+			data["ActiveAnalysisJob"] = activeJob
+		}
 	}
 
 	if tabName == "placements" {
@@ -238,6 +253,11 @@ func (h *ProjectHandler) ShowTab(w http.ResponseWriter, r *http.Request) {
 		placements, err := h.app.Services.PlacementService.GetLatestPlacements(r.Context(), projectID)
 		if err == nil {
 			data["Placements"] = placements
+
+			isStale, err := h.app.Services.PlacementService.ArePlacementsStale(r.Context(), projectID, placements)
+			if err == nil {
+				data["PlacementsStale"] = isStale
+			}
 		}
 
 		summary, err := h.app.Services.PlacementService.SummarizePlacements(r.Context(), projectID)
@@ -245,9 +265,14 @@ func (h *ProjectHandler) ShowTab(w http.ResponseWriter, r *http.Request) {
 			data["PlacementSummary"] = summary
 		}
 
-		latestRun, err := h.app.Services.AnalysisService.GetLatestRun(r.Context(), projectID)
+		latestRun, err := h.app.Services.AnalysisService.GetLatestByProject(r.Context(), projectID)
 		if err == nil && latestRun != nil {
 			data["LatestAnalysisRun"] = latestRun
+		}
+
+		activeJob, err := h.app.Services.JobService.GetLatestActiveByProject(r.Context(), projectID)
+		if err == nil && activeJob != nil && activeJob.Kind == domain.JobKindPlacement {
+			data["ActivePlacementJob"] = activeJob
 		}
 	}
 

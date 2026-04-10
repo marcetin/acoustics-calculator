@@ -23,7 +23,7 @@ func (h *AnalysisHandler) RunAnalysis(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.app.Services.AnalysisService.RunAnalysis(r.Context(), projectID)
+	_, err := h.app.Services.JobService.RunAnalysisJob(r.Context(), projectID, h.app.Services.AnalysisService)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

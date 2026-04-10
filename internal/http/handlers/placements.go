@@ -23,7 +23,7 @@ func (h *PlacementsHandler) GeneratePlacements(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	_, err := h.app.Services.PlacementService.GeneratePlacements(r.Context(), projectID)
+	_, err := h.app.Services.JobService.RunPlacementsJob(r.Context(), projectID, h.app.Services.PlacementService)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

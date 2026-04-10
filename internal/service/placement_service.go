@@ -84,10 +84,38 @@ func (s *PlacementService) CanGeneratePlacements(ctx context.Context, projectID 
 
 	warnings := []string{}
 	if project.SpaceType == domain.SpaceTypePublic {
-		warnings = append(warnings, "PUBLIC profile support is provisional in V1")
+		warnings = append(warnings, "PUBLIC profile: treatment recommendations use simplified heuristics and are provisional in V1")
 	}
 
 	return &PlacementReadiness{Ready: true, Warnings: warnings}, nil
+}
+
+func (s *PlacementService) ArePlacementsStale(ctx context.Context, projectID string, placements []*domain.PlacementCandidate) (bool, error) {
+	if len(placements) == 0 {
+		return false, nil
+	}
+
+	latestPlacement := placements[0]
+	for _, p := range placements {
+		if p.CreatedAt.After(latestPlacement.CreatedAt) {
+			latestPlacement = p
+		}
+	}
+
+	latestAnalysis, err := s.analysisRepo.GetLatestByProject(ctx, projectID)
+	if err != nil {
+		return false, nil
+	}
+
+	if latestAnalysis == nil {
+		return false, nil
+	}
+
+	if latestAnalysis.CreatedAt.After(latestPlacement.CreatedAt) {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (s *PlacementService) GeneratePlacements(ctx context.Context, projectID string) ([]*domain.PlacementCandidate, error) {
