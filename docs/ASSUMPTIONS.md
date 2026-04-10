@@ -140,6 +140,23 @@ This document captures the technical assumptions and design decisions made durin
 - **Rationale**: Simple implementation, no input hash complexity, adequate for typical usage patterns
 - **Trade-offs**: May miss some edge cases where inputs change without timestamp updates, less precise than hash-based detection
 
+### Reporting System
+- **Assumption**: Browser print is sufficient for report generation
+- **Rationale**: No PDF library dependency needed, browser print is reliable and accessible
+- **Trade-offs**: Less control over exact formatting, requires user to use print dialog
+
+- **Assumption**: JSON and CSV exports provide adequate machine-readable output
+- **Rationale**: Standard formats, widely supported, sufficient for integration needs
+- **Trade-offs**: No Excel/Word export, JSON structure may be complex for non-technical users
+
+- **Assumption**: Single report template works for all project types
+- **Rationale**: Simpler implementation, consistent presentation across projects
+- **Trade-offs**: May not be optimal for specific use cases, less customization
+
+- **Assumption**: Demo project creation without full setup is adequate for testing
+- **Rationale**: Quick way to test app without complex seed data
+- **Trade-offs**: Demo project requires manual setup of geometry, sources, receivers to be fully functional
+
 ---
 
 ## User Interface Assumptions

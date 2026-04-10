@@ -33,6 +33,7 @@ func New(application *app.App) *chi.Mux {
 	analysisHandler := handlers.NewAnalysisHandler(application)
 	placementsHandler := handlers.NewPlacementsHandler(application)
 	jobsHandler := handlers.NewJobsHandler(application)
+	reportsHandler := handlers.NewReportsHandler(application)
 
 	// Routes
 	r.Get("/", projectHandler.ListProjects)
@@ -40,6 +41,7 @@ func New(application *app.App) *chi.Mux {
 
 	// Project routes
 	r.Get("/projects/new", projectHandler.ShowNewProjectForm)
+	r.Post("/projects/demo", projectHandler.CreateDemoProject)
 	r.Post("/projects", projectHandler.CreateProject)
 	r.Get("/projects/{id}", projectHandler.ShowProject)
 
@@ -73,6 +75,11 @@ func New(application *app.App) *chi.Mux {
 
 	// Job status routes
 	r.Get("/hx/projects/{id}/jobs/{jobID}/status", jobsHandler.GetJobStatus)
+
+	// Report routes
+	r.Get("/projects/{id}/report", reportsHandler.ShowReport)
+	r.Get("/api/v1/projects/{id}/report.json", reportsHandler.ExportJSON)
+	r.Get("/projects/{id}/placements.csv", reportsHandler.ExportPlacementsCSV)
 
 	// HTMX tab routes
 	r.Get("/hx/projects/{id}/tabs/{tab}", projectHandler.ShowTab)

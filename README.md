@@ -110,7 +110,7 @@ migrations/        - Database migration files
 
 ## MVP Scope
 
-The current MVP (Phase 5 Complete) implements:
+The current MVP (Phase 6 Complete - MVP Done) implements:
 
 - ✅ Project management with space type configuration
 - ✅ Shoebox room geometry with automatic surface generation
@@ -147,11 +147,16 @@ The current MVP (Phase 5 Complete) implements:
 - ✅ PUBLIC profile warnings in analysis and placements
 - ✅ Empty states for no analysis/placements
 - ✅ Unit tests for job lifecycle
+- ✅ JSON export for full project report
+- ✅ CSV export for placement recommendations
+- ✅ Printable HTML report page
+- ✅ Export actions in project workspace
+- ✅ Demo project creation
+- ✅ Empty/stale/PUBLIC state handling in reports
+- ✅ Print-friendly CSS
+- ✅ Unit tests for report/export
 
-**Coming in Phase 6**:
-- JSON/CSV export
-- HTML reports
-- Final UX polish
+**MVP Status**: COMPLETE
 
 ## Future Enhancements
 

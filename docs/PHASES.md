@@ -393,20 +393,41 @@ This document outlines the phased development approach for the Acoustics Calcula
 
 ---
 
-## PHASE 6 - Reports + Polish
+## PHASE 6 - Reports + Polish ✅ COMPLETED
 
 **Goal**: Finalize MVP with export capabilities and polish.
 
-### Planned Features
-- ✅ JSON/CSV export
-- ✅ HTML reports
-- ✅ Sample projects
-- ✅ Performance optimization
-- ✅ Documentation completion
+### What Was Implemented
+- ✅ ReportService with BuildProjectReport, BuildPlacementsCSV, GetPrintableReportData
+- ✅ JSON export endpoint GET /api/v1/projects/{id}/report.json
+- ✅ CSV placements export endpoint GET /projects/{id}/placements.csv
+- ✅ Printable HTML report page GET /projects/{id}/report
+- ✅ Export actions (View Report, Export JSON, Export CSV) in project workspace
+- ✅ Demo project creation via dashboard button
+- ✅ Empty/stale/PUBLIC state handling in reports
+- ✅ Print-friendly CSS for report page
+- ✅ Unit test for demo project creation
 
----
+### Key Features
+- **JSON Export**: Full project report with project, geometry, surfaces, materials, sources, receivers, constraints, latest analysis, latest placements, metadata
+- **CSV Export**: Placement candidates with project_id, analysis_run_id, surface, decision, score, confidence, diffuser type, orientation, center coordinates, panel count, coverage area, target bands, reasons, warnings
+- **Printable Report**: Browser-printable HTML report with sections for project overview, geometry, sources/receivers, constraints, analysis summary, placements summary, assumptions
+- **Stale Detection**: Analysis stale if inputs changed, placements stale if new analysis exists
+- **PUBLIC Profile**: Conservative warnings and provisional disclaimers in reports
+- **Empty States**: Clear messaging when no geometry, analysis, or placements exist
+- **Demo Project**: "Create Demo Project" button on dashboard creates a sample Studio project
+- **Export Actions**: Three export buttons in project header for easy access
 
-## Technical Architecture
+### Technical Implementation
+- ReportService aggregates data from all repositories and services
+- BuildProjectReport assembles complete project report with stale flags
+- BuildPlacementsCSV converts placement candidates to CSV rows
+- ShowReport handler renders printable HTML report with embedded CSS
+- ExportJSON handler returns JSON with Content-Disposition attachment header
+- ExportPlacementsCSV handler returns CSV with header row
+- Report template uses Go template syntax with conditional sections
+- Print CSS uses @media print for print-specific styling
+- Demo project uses CreateDemoProject method in ProjectService
 
 ### Layer Structure
 ```
@@ -435,25 +456,61 @@ migrations/        - Database schema
 
 ## Current Status
 
-**Phase 5 Complete** ✅
+**Phase 6 Complete - MVP Complete** ✅
 
-The application now provides a complete job tracking and results experience with:
+The application now provides a complete MVP with:
+- Full project management with space type configuration
+- Shoebox room geometry with automatic surface generation
+- Material library with preset absorption/scattering coefficients
+- Surface material assignment interface
+- Interactive 2D room editor (top-down, drag-and-drop)
+- Source positioning with CRUD operations
+- Receiver positioning with CRUD operations
+- Treatment constraint configuration
+- Real-time validation and error handling
+- Summary tab with configuration readiness tracking
+- Rectangular modal frequency calculations
+- First and second order early reflections
+- Sabine and Eyring RT calculations
+- Acoustic analysis execution with persistence
+- Results visualization (modes, RT, reflections)
+- Prerequisites validation and warnings
+- Unit tests for acoustics engine
+- Diffuser placement candidate generation
+- Scoring and ranking system
+- Treatment recommendations (DIFFUSER, ABSORBER_RECOMMENDED, REJECT)
+- Diffuser type assignment (QRD_1D, QRD_2D, CUSTOM)
+- Layout synthesis for panel coordinates
+- Placement persistence linked to AnalysisRun
+- Placements UI with results
+- Profile-specific rules (STUDIO, HIFI, PUBLIC)
 - In-process job tracking with persistence
 - Job-backed analysis execution with progress updates
 - Job-backed placement generation with progress updates
-- HTMX polling for real-time job status
-- Job status panel with progress bar and phases
+- HTMX polling for job status
+- Job status panel with progress bar
 - Stale-state detection for analysis and placements
 - PUBLIC profile warnings in analysis and placements
 - Empty states for no analysis/placements
 - Unit tests for job lifecycle
+- JSON export for full project report
+- CSV export for placement recommendations
+- Printable HTML report page
+- Export actions in project workspace
+- Demo project creation
+- Empty/stale/PUBLIC state handling in reports
+- Print-friendly CSS
+- Unit tests for report/export
 
-**Ready for**: Phase 6 - Reports + Polish
+**MVP Status**: COMPLETE
 
-The job tracking system is complete and ready for export capabilities and final polish. Users can now:
-- Run analysis as tracked jobs with progress updates
-- Generate placements as tracked jobs with progress updates
-- See real-time job status with progress bar
-- View stale warnings when inputs change
-- See clear PUBLIC profile warnings
-- Regenerate jobs safely without confusing stale UI state
+The MVP is complete with all planned features implemented. Users can now:
+- Create and manage acoustic projects
+- Configure room geometry and materials
+- Position sources and receivers interactively
+- Run acoustic analysis with job tracking
+- Generate placement recommendations with job tracking
+- View results with real-time progress
+- Export JSON and CSV reports
+- Print professional HTML reports
+- Create demo projects for quick testing

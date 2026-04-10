@@ -8,6 +8,11 @@
         </div>
     </div>
     <div class="project-meta">
+        <div class="project-actions">
+            <a href="/projects/{{.Project.ID}}/report" class="btn btn-secondary btn-sm">View Report</a>
+            <a href="/api/v1/projects/{{.Project.ID}}/report.json" class="btn btn-secondary btn-sm">Export JSON</a>
+            <a href="/projects/{{.Project.ID}}/placements.csv" class="btn btn-secondary btn-sm">Export CSV</a>
+        </div>
         <p>Created {{.Project.CreatedAt.Format "January 2, 2006 at 3:04 PM"}}</p>
         {{if ne .Project.CreatedAt .Project.UpdatedAt}}
         <p>Last updated {{.Project.UpdatedAt.Format "January 2, 2006 at 3:04 PM"}}</p>
@@ -96,6 +101,12 @@ document.addEventListener('click', function(e) {
     text-align: right;
     color: var(--secondary-color);
     font-size: 0.9rem;
+}
+
+.project-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .project-meta p {

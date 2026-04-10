@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{$.Report.Project.Name}} - Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #333;
+            background: #fff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        @media print {
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e0e0e0;
+            color: #1a1a1a;
+        }
+
+        h3 {
+            font-size: 1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #333;
+        }
+
+        .report-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .report-meta {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-info {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #333;
+            margin-top: 0.25rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .empty-state {
+            padding: 2rem;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .warning-box strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #856404;
+        }
+
+        .assumptions {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        .assumptions ul {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .assumptions li {
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            h1, h2, h3 {
+                page-break-after: avoid;
+            }
+
+            table {
+                page-break-inside: auto;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="report-header">
+            <h1>{{$.Report.Project.Name}} - Acoustic Report</h1>
+            <div class="report-meta">
+                Space Type: {{$.Report.Project.SpaceType}} | 
+                Goal: {{$.Report.Project.GoalType}} |
+                Generated: {{$.Report.Metadata.GeneratedAt.Format "2006-01-02 15:04:05"}}
+                {{if $.Report.Metadata.IsPublicProfile}}
+                <span class="badge badge-warning">PUBLIC Profile (Provisional)</span>
+                {{end}}
+            </div>
+        </div>
+
+        <section>
+            <h2>Project Overview</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Units</div>
+                    <div class="info-value">{{$.Report.Project.Units}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Temperature</div>
+                    <div class="info-value">{{printf "%.1f" $.Report.Project.TemperatureC}}°C</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Humidity</div>
+                    <div class="info-value">{{printf "%.1f" $.Report.Project.HumidityPercent}}%</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Speed of Sound</div>
+                    <div class="info-value">{{printf "%.1f" $.Report.Project.SpeedOfSound}} m/s</div>
+                </div>
+            </div>
+            {{if $.Report.Metadata.IsPublicProfile}}
+            <div class="warning-box">
+                <strong>⚠️ PUBLIC Profile - Provisional Support</strong>
+                This report uses simplified heuristics for public-space acoustics. Results are provisional in V1.
+            </div>
+            {{end}}
+        </section>
+
+        {{if $.Report.Geometry}}
+        <section>
+            <h2>Geometry Summary</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Type</div>
+                    <div class="info-value">{{$.Report.Geometry.GeometryType}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Dimensions</div>
+                    <div class="info-value">{{printf "%.2f × %.2f × %.2f m" $.Report.Geometry.WidthM $.Report.Geometry.LengthM $.Report.Geometry.HeightM}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Volume</div>
+                    <div class="info-value">{{printf "%.2f m³" $.Report.Geometry.VolumeM3}}</div>
+                </div>
+            </div>
+            {{if $.Report.Surfaces}}
+            <h3>Surfaces</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Surface</th>
+                        <th>Kind</th>
+                        <th>Area (m²)</th>
+                        <th>Mountable</th>
+                        <th>Material</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $.Report.Surfaces}}
+                    <tr>
+                        <td>{{.Name}}</td>
+                        <td>{{.Kind}}</td>
+                        <td>{{printf "%.2f" .AreaM2}}</td>
+                        <td>{{if .Mountable}}Yes{{else}}No{{end}}</td>
+                        <td>{{if .MaterialName}}{{.MaterialName}}{{else}}—{{end}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            {{end}}
+        </section>
+        {{end}}
+
+        {{if and $.Report.Sources $.Report.Receivers}}
+        <section>
+            <h2>Sources and Receivers</h2>
+            <h3>Sources ({{len $.Report.Sources}})</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Position (X, Y, Z)</th>
+                        <th>Gain (dB)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $.Report.Sources}}
+                    <tr>
+                        <td>{{.Name}}</td>
+                        <td>{{.Type}}</td>
+                        <td>{{printf "%.2f, %.2f, %.2f" .X .Y .Z}}</td>
+                        <td>{{printf "%.1f" .GainDB}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            <h3>Receivers ({{len $.Report.Receivers}})</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Position (X, Y, Z)</th>
+                        <th>Weight</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $.Report.Receivers}}
+                    <tr>
+                        <td>{{.Name}}</td>
+                        <td>{{.Type}}</td>
+                        <td>{{printf "%.2f, %.2f, %.2f" .X .Y .Z}}</td>
+                        <td>{{printf "%.2f" .Weight}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </section>
+        {{else}}
+        <section>
+            <h2>Sources and Receivers</h2>
+            <div class="empty-state">No sources or receivers configured</div>
+        </section>
+        {{end}}
+
+        {{if $.Report.Constraints}}
+        <section>
+            <h2>Constraints Summary</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Max Panel Depth</div>
+                    <div class="info-value">{{if gt $.Report.Constraints.MaxPanelDepthM 0}}{{printf "%.2f m" $.Report.Constraints.MaxPanelDepthM}}{{else}}—{{end}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Symmetry Required</div>
+                    <div class="info-value">{{if $.Report.Constraints.SymmetryRequired}}Yes{{else}}No{{end}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Budget Class</div>
+                    <div class="info-value">{{$.Report.Constraints.BudgetClass}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Preferred Mode</div>
+                    <div class="info-value">{{$.Report.Constraints.PreferredTreatmentMode}}</div>
+                </div>
+            </div>
+        </section>
+        {{end}}
+
+        {{if $.Report.LatestAnalysis}}
+        <section>
+            <h2>Latest Analysis Summary</h2>
+            {{if $.Report.LatestAnalysis.IsStale}}
+            <div class="warning-box">
+                <strong>⚠️ Analysis May Be Outdated</strong>
+                Room geometry, sources, or receivers have been modified since this analysis was run.
+            </div>
+            {{end}}
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Run Date</div>
+                    <div class="info-value">{{$.Report.LatestAnalysis.CreatedAt.Format "2006-01-02 15:04"}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value">{{$.Report.LatestAnalysis.Status}}</div>
+                </div>
+                {{if $.Report.LatestAnalysis.Summary}}
+                <div class="info-item">
+                    <div class="info-label">Total Modes</div>
+                    <div class="info-value">{{$.Report.LatestAnalysis.Summary.TotalModes}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Total Reflections</div>
+                    <div class="info-value">{{$.Report.LatestAnalysis.Summary.TotalReflections}}</div>
+                </div>
+                {{end}}
+            </div>
+            {{if $.Report.LatestAnalysis.Warnings}}
+            <div class="warning-box">
+                <strong>Warnings</strong>
+                <ul>
+                    {{range $.Report.LatestAnalysis.Warnings}}
+                    <li>{{.}}</li>
+                    {{end}}
+                </ul>
+            </div>
+            {{end}}
+            {{if $.Report.LatestAnalysis.RT}}
+            <h3>Reverberation Time</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Frequency (Hz)</th>
+                        <th>Sabine T60 (s)</th>
+                        <th>Eyring T60 (s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $.Report.LatestAnalysis.RT.Bands}}
+                    <tr>
+                        <td>{{printf "%.0f" .FrequencyHz}}</td>
+                        <td>{{printf "%.3f" .SabineT60}}</td>
+                        <td>{{printf "%.3f" .EyringT60}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            {{end}}
+            {{if $.Report.LatestAnalysis.Modes}}
+            <h3>Room Modes (Top 10)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>L</th>
+                        <th>M</th>
+                        <th>N</th>
+                        <th>Frequency (Hz)</th>
+                        <th>Kind</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{firstN 10 $.Report.LatestAnalysis.Modes}}
+                    <tr>
+                        <td>{{.L}}</td>
+                        <td>{{.M}}</td>
+                        <td>{{.N}}</td>
+                        <td>{{printf "%.2f" .Freq}}</td>
+                        <td>{{.Kind}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            {{end}}
+        </section>
+        {{else}}
+        <section>
+            <h2>Latest Analysis Summary</h2>
+            <div class="empty-state">No analysis run yet</div>
+        </section>
+        {{end}}
+
+        {{if $.Report.LatestPlacements}}
+        <section>
+            <h2>Latest Placements Summary</h2>
+            {{if $.Report.LatestPlacements.IsStale}}
+            <div class="warning-box">
+                <strong>⚠️ Placements May Be Outdated</strong>
+                A new analysis run exists after these placements were generated.
+            </div>
+            {{end}}
+            {{if $.Report.LatestPlacements.Summary}}
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Total Candidates</div>
+                    <div class="info-value">{{$.Report.LatestPlacements.Summary.TotalCandidates}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Diffusers</div>
+                    <div class="info-value">{{$.Report.LatestPlacements.Summary.DiffuserCount}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Absorbers</div>
+                    <div class="info-value">{{$.Report.LatestPlacements.Summary.AbsorberRecommendedCount}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Rejected</div>
+                    <div class="info-value">{{$.Report.LatestPlacements.Summary.RejectCount}}</div>
+                </div>
+            </div>
+            {{end}}
+            {{if $.Report.LatestPlacements.Warnings}}
+            <div class="warning-box">
+                <strong>Warnings</strong>
+                <ul>
+                    {{range $.Report.LatestPlacements.Warnings}}
+                    <li>{{.}}</li>
+                    {{end}}
+                </ul>
+            </div>
+            {{end}}
+            {{if $.Report.LatestPlacements.Candidates}}
+            <h3>Placement Candidates (Top 20)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Surface</th>
+                        <th>Decision</th>
+                        <th>Score</th>
+                        <th>Confidence</th>
+                        <th>Diffuser Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{firstN 20 $.Report.LatestPlacements.Candidates}}
+                    <tr>
+                        <td>{{.SurfaceID}}</td>
+                        <td>{{.Decision}}</td>
+                        <td>{{printf "%.4f" .Score}}</td>
+                        <td>{{printf "%.4f" .Confidence}}</td>
+                        <td>{{if .DiffuserTypeID}}{{.DiffuserTypeID}}{{else}}—{{end}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            {{end}}
+        </section>
+        {{else}}
+        <section>
+            <h2>Latest Placements Summary</h2>
+            <div class="empty-state">No placements generated yet</div>
+        </section>
+        {{end}}
+
+        <section class="assumptions">
+            <h3>Assumptions and Limitations</h3>
+            <ul>
+                {{range $.Report.Metadata.Assumptions}}
+                <li>{{.}}</li>
+                {{end}}
+            </ul>
+            <div style="margin-top: 1rem; font-size: 0.875rem; color: #666;">
+                <strong>Report Version:</strong> {{$.Report.Metadata.ReportVersion}} | 
+                <strong>Generated:</strong> {{$.Report.Metadata.GeneratedAt.Format "2006-01-02 15:04:05"}}
+            </div>
+        </section>
+    </div>
+</body>
+</html>

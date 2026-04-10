@@ -48,6 +48,16 @@ func (h *ProjectHandler) ShowNewProjectForm(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+func (h *ProjectHandler) CreateDemoProject(w http.ResponseWriter, r *http.Request) {
+	project, err := h.app.Services.ProjectService.CreateDemoProject(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/projects/"+project.ID, http.StatusSeeOther)
+}
+
 func (h *ProjectHandler) CreateProject(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Failed to parse form", http.StatusBadRequest)
