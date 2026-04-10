@@ -1,0 +1,388 @@
+<div class="room-editor" 
+     data-project-id="{{$.Project.ID}}"
+     data-room-width="{{if $.Geometry}}{{$.Geometry.Width}}{{else}}0{{end}}"
+     data-room-length="{{if $.Geometry}}{{$.Geometry.Length}}{{else}}0{{end}}"
+     data-sources='{{range $i, $s := $.Sources}}{{if $i}},{{end}}{"id":"{{$s.ID}}","name":"{{$s.Name}}","x":{{$s.PositionX}},"y":{{$s.PositionY}},"z":{{$s.PositionZ}}}{{end}}'
+     data-receivers='{{range $i, $r := $.Receivers}}{{if $i}},{{end}}{"id":"{{$r.ID}}","name":"{{$r.Name}}","x":{{$r.PositionX}},"y":{{$r.PositionY}},"z":{{$r.PositionZ}}}{{end}}'>
+    <div class="editor-header">
+        <h4>Room Editor (Top-Down)</h4>
+        <p class="editor-subtitle">Drag markers to move sources/receivers on X/Y plane</p>
+    </div>
+
+    <div class="editor-container" id="editor-container">
+        <svg id="room-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+            <!-- Room outline -->
+            <rect id="room-rect" x="0" y="0" width="100" height="100" fill="#f5f5f5" stroke="#333" stroke-width="2"/>
+
+            <!-- Grid lines -->
+            <g id="grid-lines"></g>
+
+            <!-- Sources -->
+            <g id="sources-group"></g>
+
+            <!-- Receivers -->
+            <g id="receivers-group"></g>
+        </svg>
+    </div>
+
+    <div class="editor-legend">
+        <div class="legend-item">
+            <div class="legend-marker source-marker"></div>
+            <span>Source</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-marker receiver-marker"></div>
+            <span>Receiver</span>
+        </div>
+    </div>
+
+    <div id="editor-status" class="editor-status"></div>
+</div>
+
+<style>
+.room-editor {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.editor-header h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--dark-color);
+}
+
+.editor-subtitle {
+    margin: 0 0 1.5rem 0;
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+}
+
+.editor-container {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #fafafa;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+#room-svg {
+    width: 100%;
+    height: 100%;
+}
+
+#room-rect {
+    fill: #ffffff;
+    stroke: var(--border-color);
+    stroke-width: 2;
+}
+
+#grid-lines line {
+    stroke: #e0e0e0;
+    stroke-width: 0.5;
+}
+
+.source-marker {
+    width: 20px;
+    height: 20px;
+    background: #1976d2;
+    border: 2px solid #0d47a1;
+    border-radius: 50%;
+}
+
+.receiver-marker {
+    width: 20px;
+    height: 20px;
+    background: #388e3c;
+    border: 2px solid #1b5e20;
+}
+
+.editor-legend {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+}
+
+.editor-status {
+    min-height: 24px;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.editor-status.success {
+    color: #28a745;
+}
+
+.editor-status.error {
+    color: #dc3545;
+}
+
+.editor-status.info {
+    color: #1976d2;
+}
+
+.marker-label {
+    font-size: 8px;
+    fill: #333;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+.draggable-marker {
+    cursor: move;
+}
+
+.draggable-marker:hover {
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .editor-container {
+        aspect-ratio: 1/1;
+    }
+}
+</style>
+
+<script>
+(function() {
+    const editorEl = document.querySelector('.room-editor');
+    const svg = document.getElementById('room-svg');
+    const sourcesGroup = document.getElementById('sources-group');
+    const receiversGroup = document.getElementById('receivers-group');
+    const statusEl = document.getElementById('editor-status');
+
+    let isDragging = false;
+    let currentMarker = null;
+    let dragOffset = { x: 0, y: 0 };
+
+    const projectId = editorEl.dataset.projectId;
+    const roomWidth = parseFloat(editorEl.dataset.roomWidth) || 0;
+    const roomLength = parseFloat(editorEl.dataset.roomLength) || 0;
+
+    const sources = JSON.parse(editorEl.dataset.sources || '[]');
+    const receivers = JSON.parse(editorEl.dataset.receivers || '[]');
+    
+    function setStatus(message, type = 'info') {
+        statusEl.textContent = message;
+        statusEl.className = 'editor-status ' + type;
+        setTimeout(() => {
+            statusEl.textContent = '';
+            statusEl.className = 'editor-status';
+        }, 3000);
+    }
+    
+    function roomToWorld(x, y) {
+        return {
+            x: x * roomWidth / 100,
+            y: y * roomLength / 100
+        };
+    }
+    
+    function worldToRoom(x, y) {
+        return {
+            x: x * 100 / roomWidth,
+            y: y * 100 / roomLength
+        };
+    }
+    
+    function drawGrid() {
+        const gridGroup = document.getElementById('grid-lines');
+        gridGroup.innerHTML = '';
+        
+        for (let i = 10; i < 100; i += 10) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', i);
+            line.setAttribute('y1', 0);
+            line.setAttribute('x2', i);
+            line.setAttribute('y2', 100);
+            gridGroup.appendChild(line);
+            
+            const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line2.setAttribute('x1', 0);
+            line2.setAttribute('y1', i);
+            line2.setAttribute('x2', 100);
+            line2.setAttribute('y2', i);
+            gridGroup.appendChild(line2);
+        }
+    }
+    
+    function createMarker(entity, type) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'draggable-marker');
+        g.setAttribute('data-id', entity.id);
+        g.setAttribute('data-type', type);
+        g.setAttribute('data-x', entity.x);
+        g.setAttribute('data-y', entity.y);
+        g.setAttribute('data-z', entity.z);
+
+        const pos = worldToRoom(entity.x, entity.y);
+
+        const shape = document.createElementNS('http://www.w3.org/2000/svg', type === 'source' ? 'circle' : 'rect');
+        shape.setAttribute('cx', type === 'source' ? pos.x : pos.x - 3);
+        shape.setAttribute('cy', type === 'source' ? pos.y : pos.y - 3);
+        shape.setAttribute('r', type === 'source' ? 4 : 4);
+        shape.setAttribute('width', type === 'source' ? 0 : 8);
+        shape.setAttribute('height', type === 'source' ? 0 : 8);
+        shape.setAttribute('fill', type === 'source' ? '#1976d2' : '#388e3c');
+        shape.setAttribute('stroke', type === 'source' ? '#0d47a1' : '#1b5e20');
+        shape.setAttribute('stroke-width', '1');
+
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', pos.x);
+        label.setAttribute('y', pos.y - 8);
+        label.setAttribute('class', 'marker-label');
+        label.textContent = entity.name.substring(0, 8);
+
+        g.appendChild(shape);
+        g.appendChild(label);
+
+        return g;
+    }
+    
+    function renderMarkers() {
+        sourcesGroup.innerHTML = '';
+        receiversGroup.innerHTML = '';
+        
+        sources.forEach(source => {
+            sourcesGroup.appendChild(createMarker(source, 'source'));
+        });
+        
+        receivers.forEach(receiver => {
+            receiversGroup.appendChild(createMarker(receiver, 'receiver'));
+        });
+    }
+    
+    function getSVGPoint(event) {
+        const rect = svg.getBoundingClientRect();
+        return {
+            x: ((event.clientX - rect.left) / rect.width) * 100,
+            y: ((event.clientY - rect.top) / rect.height) * 100
+        };
+    }
+    
+    function handleMouseDown(event) {
+        const marker = event.target.closest('.draggable-marker');
+        if (!marker) return;
+        
+        isDragging = true;
+        currentMarker = marker;
+        const point = getSVGPoint(event);
+        const markerX = parseFloat(marker.getAttribute('data-x-room')) || parseFloat(marker.querySelector('circle, rect').getAttribute(type === 'source' ? 'cx' : 'x'));
+        const markerY = parseFloat(marker.getAttribute('data-y-room')) || parseFloat(marker.querySelector('circle, rect').getAttribute(type === 'source' ? 'cy' : 'y'));
+        
+        dragOffset = {
+            x: point.x - markerX,
+            y: point.y - markerY
+        };
+        
+        marker.setAttribute('data-x-room', markerX);
+        marker.setAttribute('data-y-room', markerY);
+        
+        event.preventDefault();
+    }
+    
+    function handleMouseMove(event) {
+        if (!isDragging || !currentMarker) return;
+        
+        const point = getSVGPoint(event);
+        let newX = point.x - dragOffset.x;
+        let newY = point.y - dragOffset.y;
+        
+        newX = Math.max(2, Math.min(98, newX));
+        newY = Math.max(2, Math.min(98, newY));
+        
+        const type = currentMarker.getAttribute('data-type');
+        const shape = currentMarker.querySelector('circle, rect');
+        const label = currentMarker.querySelector('text');
+        
+        if (type === 'source') {
+            shape.setAttribute('cx', newX);
+            shape.setAttribute('cy', newY);
+        } else {
+            shape.setAttribute('x', newX - 4);
+            shape.setAttribute('y', newY - 4);
+        }
+        label.setAttribute('x', newX);
+        label.setAttribute('y', newY - 8);
+        
+        currentMarker.setAttribute('data-x-room', newX);
+        currentMarker.setAttribute('data-y-room', newY);
+    }
+    
+    async function handleMouseUp(event) {
+        if (!isDragging || !currentMarker) return;
+        
+        const type = currentMarker.getAttribute('data-type');
+        const id = currentMarker.getAttribute('data-id');
+        const roomX = parseFloat(currentMarker.getAttribute('data-x-room'));
+        const roomY = parseFloat(currentMarker.getAttribute('data-y-room'));
+        const z = parseFloat(currentMarker.getAttribute('data-z'));
+        
+        const worldPos = roomToWorld(roomX, roomY);
+        
+        setStatus('Saving position...', 'info');
+        
+        try {
+            const endpoint = type === 'source' 
+                ? `/hx/projects/${projectId}/editor/sources/${id}/move`
+                : `/hx/projects/${projectId}/editor/receivers/${id}/move`;
+            
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    x: worldPos.x.toFixed(2),
+                    y: worldPos.y.toFixed(2)
+                })
+            });
+            
+            if (response.ok) {
+                setStatus('Position saved', 'success');
+                currentMarker.setAttribute('data-x', worldPos.x);
+                currentMarker.setAttribute('data-y', worldPos.y);
+            } else {
+                const text = await response.text();
+                setStatus('Error: ' + (text || 'Failed to save'), 'error');
+                renderMarkers();
+            }
+        } catch (error) {
+            setStatus('Error: ' + error.message, 'error');
+            renderMarkers();
+        }
+        
+        isDragging = false;
+        currentMarker = null;
+    }
+    
+    function init() {
+        if (!roomWidth || !roomLength) {
+            setStatus('Geometry not configured', 'error');
+            return;
+        }
+        
+        drawGrid();
+        renderMarkers();
+        
+        svg.addEventListener('mousedown', handleMouseDown);
+        svg.addEventListener('mousemove', handleMouseMove);
+        svg.addEventListener('mouseup', handleMouseUp);
+        svg.addEventListener('mouseleave', handleMouseUp);
+    }
+    
+    init();
+})();
+</script>

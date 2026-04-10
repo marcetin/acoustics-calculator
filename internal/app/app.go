@@ -3,10 +3,28 @@ package app
 import (
 	"database/sql"
 	"html/template"
+	"reflect"
 
 	"acoustics-calculator/internal/repo"
 	"acoustics-calculator/internal/service"
 )
+
+func firstN(n int, slice interface{}) interface{} {
+	if slice == nil {
+		return nil
+	}
+
+	v := reflect.ValueOf(slice)
+	if v.Kind() != reflect.Slice {
+		return slice
+	}
+
+	if n >= v.Len() {
+		return slice
+	}
+
+	return v.Slice(0, n).Interface()
+}
 
 type App struct {
 	DB        *sql.DB
@@ -17,7 +35,14 @@ type App struct {
 }
 
 type Services struct {
-	ProjectService *service.ProjectService
+	ProjectService    *service.ProjectService
+	GeometryService   *service.GeometryService
+	MaterialService   *service.MaterialService
+	SourceService     *service.SourceService
+	ReceiverService   *service.ReceiverService
+	ConstraintService *service.ConstraintService
+	AnalysisService   *service.AnalysisService
+	PlacementService  *service.PlacementService
 }
 
 func New() *App {
@@ -40,7 +65,14 @@ func (a *App) Bootstrap() error {
 	}
 
 	a.Services = &Services{
-		ProjectService: service.NewProjectService(a.Repos.Project),
+		ProjectService:    service.NewProjectService(a.Repos.Project),
+		GeometryService:   service.NewGeometryService(a.Repos.Geometry, a.Repos.Surface),
+		MaterialService:   service.NewMaterialService(a.Repos.Material, a.Repos.Surface),
+		SourceService:     service.NewSourceService(a.Repos.Source, a.Repos.Geometry),
+		ReceiverService:   service.NewReceiverService(a.Repos.Receiver, a.Repos.Geometry),
+		ConstraintService: service.NewConstraintService(a.Repos.Constraint),
+		AnalysisService:   service.NewAnalysisService(a.Repos.Analysis, a.Repos.Project, a.Repos.Geometry, a.Repos.Surface, a.Repos.Source, a.Repos.Receiver, a.Repos.Material),
+		PlacementService:  service.NewPlacementService(a.Repos.Placement, a.Repos.Project, a.Repos.Geometry, a.Repos.Surface, a.Repos.Analysis, a.Repos.Diffuser, a.Repos.Constraint),
 	}
 
 	if err := a.loadTemplates(); err != nil {
@@ -51,7 +83,10 @@ func (a *App) Bootstrap() error {
 }
 
 func (a *App) loadTemplates() error {
-	templates := template.Must(template.ParseGlob("templates/layouts/*.html"))
+	funcMap := template.FuncMap{
+		"firstN": firstN,
+	}
+	templates := template.Must(template.New("").Funcs(funcMap).ParseGlob("templates/layouts/*.html"))
 	templates = template.Must(templates.ParseGlob("templates/pages/*.html"))
 	templates = template.Must(templates.ParseGlob("templates/partials/*.html"))
 

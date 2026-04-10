@@ -110,16 +110,40 @@ migrations/        - Database migration files
 
 ## MVP Scope
 
-The current MVP implements:
+The current MVP (Phase 4 Complete) implements:
 
-- ✅ Rectangular room analysis (shoebox model)
-- ✅ Basic modal frequency calculations
+- ✅ Project management with space type configuration
+- ✅ Shoebox room geometry with automatic surface generation
+- ✅ Material library with preset absorption/scattering coefficients
+- ✅ Surface material assignment interface
+- ✅ Interactive 2D room editor (top-down, drag-and-drop)
+- ✅ Source positioning with CRUD operations
+- ✅ Receiver positioning with CRUD operations
+- ✅ Treatment constraint configuration
+- ✅ Real-time validation and error handling
+- ✅ Summary tab with configuration readiness tracking
+- ✅ Rectangular modal frequency calculations
 - ✅ First and second order early reflections
 - ✅ Sabine and Eyring RT calculations
-- ✅ Material absorption database
-- ✅ Diffuser placement recommendations
-- ✅ Interactive 2D room editor
-- ✅ Project management and persistence
+- ✅ Acoustic analysis execution with persistence
+- ✅ Results visualization (modes, RT, reflections)
+- ✅ Prerequisites validation and warnings
+- ✅ Unit tests for acoustics engine
+- ✅ Diffuser placement candidate generation
+- ✅ Scoring and ranking system
+- ✅ Treatment recommendations (DIFFUSER, ABSORBER_RECOMMENDED, REJECT)
+- ✅ Diffuser type assignment (QRD_1D, QRD_2D, CUSTOM)
+- ✅ Layout synthesis for panel coordinates
+- ✅ Placement persistence linked to AnalysisRun
+- ✅ Placements UI with results
+- ✅ Profile-specific rules (STUDIO, HIFI, PUBLIC)
+- ✅ Unit tests for scoring, veto, catalog, layout
+
+**Coming in Phase 5**:
+- Background job processing
+- Real-time status updates
+- Enhanced results UI
+- Public profile improvements
 
 ## Future Enhancements
 

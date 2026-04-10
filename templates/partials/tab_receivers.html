@@ -1,249 +1,224 @@
 <div class="tab-receivers">
-    <div class="empty-state">
-        <div class="empty-icon">👂</div>
-        <h3>Listening Positions</h3>
-        <p class="empty-description">
-            Define listening positions, microphone locations, and audience areas to analyze 
-            acoustic performance from different perspectives in your room.
-        </p>
-        
-        <div class="coming-soon">
-            <h4>Coming in Phase 2</h4>
-            <div class="feature-list">
-                <div class="feature-item">
-                    <div class="feature-icon">🪑</div>
-                    <div class="feature-content">
-                        <strong>Listener Types</strong>
-                        <span>Critical listening positions, audience zones, microphone placements</span>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">📍</div>
-                    <div class="feature-content">
-                        <strong>2D Positioning</strong>
-                        <span>Interactive placement in room layout editor</span>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">⚖️</div>
-                    <div class="feature-content">
-                        <strong>Importance Weighting</strong>
-                        <span>Prioritize critical positions in analysis</span>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">👥</div>
-                    <div class="feature-content">
-                        <strong>Audience Zones</strong>
-                        <span>Group multiple positions for public spaces</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <h3>Listening Positions</h3>
 
-        <div class="what-youll-configure">
-            <h4>What You'll Configure</h4>
-            <ul>
-                <li><strong>Listener Positions:</strong> Critical listening spots for studios</li>
-                <li><strong>Microphone Locations:</strong> Measurement and recording positions</li>
-                <li><strong>Audience Areas:</strong> Seating zones for public spaces</li>
-                <li><strong>Importance Weights:</strong> Priority levels for different positions</li>
-                <li><strong>Position Groups:</strong> Organize related listening areas</li>
-            </ul>
-        </div>
-
-        <div class="prerequisites">
-            <h4>Prerequisites</h4>
-            <div class="prerequisite-item">
-                <div class="prereq-icon">📐</div>
-                <div class="prereq-content">
-                    <strong>Geometry Required</strong>
-                    <p>Room geometry must be configured before placing listening positions.</p>
-                </div>
-            </div>
-            <div class="prerequisite-item">
-                <div class="prereq-icon">🔊</div>
-                <div class="prereq-content">
-                    <strong>Sources Recommended</strong>
-                    <p>Sound sources should be positioned for complete analysis setup.</p>
-                </div>
-            </div>
+    {{if not $.Geometry}}
+    <div class="status-notice">
+        <div class="notice-icon">⚠️</div>
+        <div class="notice-content">
+            <strong>Geometry Required</strong>
+            <p>Define room geometry in the Geometry tab before adding receivers.</p>
         </div>
     </div>
+    {{else}}
+    {{template "room_editor.html" $}}
+
+    <div class="receivers-list">
+        {{if $.Receivers}}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Position (X, Y, Z)</th>
+                    <th>Weight</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $receiver := $.Receivers}}
+                <tr>
+                    <td>{{$receiver.Name}}</td>
+                    <td>{{$receiver.Type.DisplayName}}</td>
+                    <td>{{printf "%.2f, %.2f, %.2f" $receiver.PositionX $receiver.PositionY $receiver.PositionZ}}</td>
+                    <td>{{printf "%.2f" $receiver.Weight}}</td>
+                    <td>
+                        <form method="POST" action="/projects/{{$.Project.ID}}/receivers/{{$receiver.ID}}/delete" 
+                              class="delete-form">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <div class="empty-items">
+            <p>No receivers added yet. Create your first receiver below.</p>
+        </div>
+        {{end}}
+    </div>
+
+    <div class="receiver-form-container">
+        <h4>Add New Receiver</h4>
+        <form method="POST" action="/projects/{{$.Project.ID}}/receivers" class="receiver-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">Name *</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="type">Type *</label>
+                    <select id="type" name="type" class="form-control" required>
+                        <option value="LISTENER">Listener</option>
+                        <option value="MIC">Microphone</option>
+                        <option value="AUDIENCE_ZONE" disabled>Audience Zone (Coming Soon)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="position_x">X (m) *</label>
+                    <input type="number" id="position_x" name="position_x" class="form-control" 
+                           step="0.1" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="position_y">Y (m) *</label>
+                    <input type="number" id="position_y" name="position_y" class="form-control" 
+                           step="0.1" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="position_z">Z (m) *</label>
+                    <input type="number" id="position_z" name="position_z" class="form-control" 
+                           step="0.1" min="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight</label>
+                <input type="number" id="weight" name="weight" class="form-control" 
+                       step="0.1" min="0.1" value="1.0">
+            </div>
+            <button type="submit" class="btn btn-primary">Add Receiver</button>
+        </form>
+    </div>
+    {{end}}
 </div>
 
 <style>
 .tab-receivers {
-    max-width: 800px;
+    max-width: 900px;
 }
 
-.empty-state {
-    text-align: center;
-    padding: 2rem 1rem;
-}
-
-.empty-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.7;
-}
-
-.empty-state h3 {
-    margin: 0 0 1rem 0;
-    color: var(--dark-color);
-    font-size: 1.5rem;
-}
-
-.empty-description {
-    margin: 0 0 2rem 0;
-    color: var(--secondary-color);
-    font-size: 1.1rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.6;
-}
-
-.coming-soon {
-    background: var(--light-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    text-align: left;
-}
-
-.coming-soon h4 {
-    margin: 0 0 1rem 0;
-    color: var(--primary-color);
-    text-align: center;
-}
-
-.feature-list {
-    display: grid;
-    gap: 1rem;
-}
-
-.feature-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-}
-
-.feature-icon {
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.feature-content {
-    flex: 1;
-}
-
-.feature-content strong {
-    display: block;
-    margin-bottom: 0.25rem;
+.tab-receivers h3 {
+    margin-bottom: 1.5rem;
     color: var(--dark-color);
 }
 
-.feature-content span {
-    display: block;
-    font-size: 0.875rem;
-    color: var(--secondary-color);
-}
-
-.what-youll-configure {
-    text-align: left;
-    margin-bottom: 2rem;
-}
-
-.what-youll-configure h4 {
-    margin: 0 0 1rem 0;
-    color: var(--dark-color);
-    text-align: center;
-}
-
-.what-youll-configure ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.what-youll-configure li {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.what-youll-configure li:last-child {
-    border-bottom: none;
-}
-
-.what-youll-configure li strong {
-    color: var(--dark-color);
-}
-
-.prerequisites {
-    text-align: left;
-}
-
-.prerequisites h4 {
-    margin: 0 0 1rem 0;
-    color: var(--dark-color);
-    text-align: center;
-}
-
-.prerequisite-item {
+.status-notice {
     display: flex;
     align-items: flex-start;
     gap: 1rem;
     padding: 1rem;
-    background-color: #e8f4fd;
-    border: 1px solid #bee5eb;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
     border-radius: var(--border-radius);
-    margin-bottom: 1rem;
 }
 
-.prerequisite-item:last-child {
-    margin-bottom: 0;
-}
-
-.prereq-icon {
+.notice-icon {
     font-size: 1.25rem;
     flex-shrink: 0;
 }
 
-.prereq-content strong {
+.notice-content strong {
     display: block;
     margin-bottom: 0.25rem;
-    color: #0c5460;
+    color: #856404;
 }
 
-.prereq-content p {
+.notice-content p {
     margin: 0;
-    color: #0c5460;
+    color: #856404;
     font-size: 0.875rem;
 }
 
+.receivers-list {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    margin-bottom: 2rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background: var(--light-color);
+}
+
+.data-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--dark-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.empty-items {
+    padding: 2rem;
+    text-align: center;
+    color: var(--secondary-color);
+}
+
+.receiver-form-container {
+    background: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+}
+
+.receiver-form-container h4 {
+    margin: 0 0 1rem 0;
+    color: var(--dark-color);
+}
+
+.receiver-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.delete-form {
+    display: inline;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
 @media (max-width: 768px) {
-    .empty-state {
-        padding: 1.5rem 0.5rem;
+    .data-table {
+        font-size: 0.875rem;
     }
     
-    .empty-icon {
-        font-size: 3rem;
+    .data-table th,
+    .data-table td {
+        padding: 0.5rem;
     }
     
-    .feature-item {
-        flex-direction: column;
-        text-align: center;
-        gap: 0.5rem;
-    }
-    
-    .prerequisite-item {
-        flex-direction: column;
-        text-align: center;
+    .receiver-form .form-row {
+        grid-template-columns: 1fr;
     }
 }
 </style>

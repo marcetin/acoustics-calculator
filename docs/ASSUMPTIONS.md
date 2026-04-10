@@ -66,6 +66,67 @@ This document captures the technical assumptions and design decisions made durin
 - **Rationale**: Reduces user complexity while providing realistic results
 - **Trade-offs**: Limited customization, but sufficient for MVP
 
+### 2D Room Editor
+- **Assumption**: Top-down 2D SVG editor with drag-and-drop provides adequate positioning UX
+- **Rationale**: Simplifies implementation while maintaining visual feedback
+- **Trade-offs**: Z-coordinate edited via forms only, no 3D visualization
+
+### Coordinate System
+- **Assumption**: Origin at front-left-floor corner (X=width, Y=length, Z=height) is intuitive
+- **Rationale**: Standard coordinate system for room acoustics
+- **Trade-offs**: May require user education, but consistent with industry practice
+
+### Geometry Validation
+- **Assumption**: Backend validation for positions within room bounds prevents invalid states
+- **Rationale**: Ensures data integrity for acoustic calculations
+- **Trade-offs**: Requires server round-trips for validation, but provides robustness
+
+### Acoustic Calculations
+- **Assumption**: Rectangular modal formula provides adequate mode prediction for shoebox rooms
+- **Rationale**: Standard analytical solution for rectangular spaces
+- **Trade-offs**: Limited to shoebox geometry, polyhedral not supported
+
+- **Assumption**: Image-source method up to 2nd order captures most significant early reflections
+- **Rationale**: Higher-order reflections have diminishing energy contribution
+- **Trade-offs**: Misses some late-arriving reflections, but adequate for early reflection analysis
+
+- **Assumption**: Sabine and Eyring formulas provide reasonable RT60 estimates
+- **Rationale**: Industry-standard formulas with known limitations
+- **Trade-offs**: Assumes diffuse field, may not be accurate for small rooms
+
+- **Assumption**: Default absorption coefficients (0.10-0.40) provide fallback for missing materials
+- **Rationale**: Prevents calculation failures when material data incomplete
+- **Trade-offs**: Less accurate than actual material data, but allows analysis to proceed
+
+- **Assumption**: Speed of sound formula 331.3 + 0.606*tempC is adequate for temperature adjustment
+- **Rationale**: Simple linear approximation for typical temperature ranges
+- **Trade-offs**: Humidity effects ignored, impact minimal for most applications
+
+### Placement Generation
+- **Assumption**: Reflection aggregation by surface identifies high-interest treatment zones
+- **Rationale**: Surfaces with more reflections are likely acoustic problem areas
+- **Trade-offs**: Simple aggregation may miss nuanced acoustic patterns
+
+- **Assumption**: Weighted scoring components provide adequate candidate ranking
+- **Rationale**: Explicit weights make behavior transparent and tunable
+- **Trade-offs**: Weight selection is heuristic, may not capture all acoustic factors
+
+- **Assumption**: Grid-based layout synthesis is sufficient for V1
+- **Rationale**: Simple deterministic placement without complex optimization
+- **Trade-offs**: May not achieve optimal coverage or aesthetic arrangement
+
+- **Assumption**: Veto rules prevent inappropriate placements
+- **Rationale**: Nearfield and first-reflection zones are better treated with absorption in STUDIO
+- **Trade-offs**: Conservative approach may miss viable diffusion opportunities
+
+- **Assumption**: Diffuser catalog compatibility check ensures feasible recommendations
+- **Rationale**: Depth, area, and band constraints prevent impossible placements
+- **Trade-offs**: Limited catalog may restrict recommendation quality
+
+- **Assumption**: PUBLIC profile heuristics provide provisional guidance
+- **Rationale**: Public-space acoustics require different approach, but simplified for V1
+- **Trade-offs**: Recommendations may not be optimal for complex public spaces
+
 ---
 
 ## User Interface Assumptions

@@ -61,46 +61,53 @@
                     <span>Basic project information configured</span>
                 </div>
             </div>
-            <div class="progress-item pending">
-                <div class="progress-icon">○</div>
+            <div class="progress-item {{if $.Geometry}}completed{{else}}pending{{end}}">
+                <div class="progress-icon">{{if $.Geometry}}✓{{else}}○{{end}}</div>
                 <div class="progress-text">
-                    <strong>Geometry not configured yet</strong>
-                    <span>Define room dimensions and shape</span>
+                    <strong>{{if $.Geometry}}Geometry configured{{else}}Geometry not configured yet{{end}}</strong>
+                    <span>{{if $.Geometry}}{{printf "%.2f x %.2f x %.2f m" $.Geometry.Width $.Geometry.Length $.Geometry.Height}}{{else}}Define room dimensions and shape{{end}}</span>
                 </div>
             </div>
-            <div class="progress-item pending">
-                <div class="progress-icon">○</div>
+            <div class="progress-item {{if $.Geometry}}completed{{else}}pending{{end}}">
+                <div class="progress-icon">{{if $.Geometry}}✓{{else}}○{{end}}</div>
                 <div class="progress-text">
-                    <strong>Surfaces not configured yet</strong>
-                    <span>Assign materials to walls, ceiling, and floor</span>
+                    <strong>{{if $.Surfaces}}Surfaces generated{{else}}Surfaces not generated yet{{end}}</strong>
+                    <span>{{if $.Surfaces}}{{len $.Surfaces}} surfaces{{else}}Requires geometry first{{end}}</span>
                 </div>
             </div>
-            <div class="progress-item pending">
-                <div class="progress-icon">○</div>
+            <div class="progress-item {{if $.Surfaces}}{{if gt $.MaterialsAssigned 0}}completed{{else}}warning{{end}}{{else}}pending{{end}}">
+                <div class="progress-icon">{{if $.Surfaces}}{{if gt $.MaterialsAssigned 0}}✓{{else}}⚠{{end}}{{else}}○{{end}}</div>
                 <div class="progress-text">
-                    <strong>Sources not configured yet</strong>
-                    <span>Position speakers and sound sources</span>
+                    <strong>Materials assigned</strong>
+                    <span>{{if $.Surfaces}}{{$.MaterialsAssigned}}/{{len $.Surfaces}} surfaces{{else}}Requires surfaces first{{end}}</span>
                 </div>
             </div>
-            <div class="progress-item pending">
-                <div class="progress-icon">○</div>
+            <div class="progress-item {{if $.Sources}}completed{{else}}pending{{end}}">
+                <div class="progress-icon">{{if $.Sources}}✓{{else}}○{{end}}</div>
                 <div class="progress-text">
-                    <strong>Receivers not configured yet</strong>
-                    <span>Position listening points and audience areas</span>
+                    <strong>{{if $.Sources}}Sources configured{{else}}Sources not configured yet{{end}}</strong>
+                    <span>{{if $.Sources}}{{len $.Sources}} source(s){{else}}Position speakers and sound sources{{end}}</span>
                 </div>
             </div>
-            <div class="progress-item pending">
-                <div class="progress-icon">○</div>
+            <div class="progress-item {{if $.Receivers}}completed{{else}}pending{{end}}">
+                <div class="progress-icon">{{if $.Receivers}}✓{{else}}○{{end}}</div>
                 <div class="progress-text">
-                    <strong>Constraints not configured yet</strong>
-                    <span>Set treatment preferences and limitations</span>
+                    <strong>{{if $.Receivers}}Receivers configured{{else}}Receivers not configured yet{{end}}</strong>
+                    <span>{{if $.Receivers}}{{len $.Receivers}} receiver(s){{else}}Position listening points{{end}}</span>
                 </div>
             </div>
-            <div class="progress-item pending">
-                <div class="progress-icon">○</div>
+            <div class="progress-item {{if $.Constraints}}completed{{else}}pending{{end}}">
+                <div class="progress-icon">{{if $.Constraints}}✓{{else}}○{{end}}</div>
                 <div class="progress-text">
-                    <strong>Analysis not run yet</strong>
-                    <span>Run acoustic analysis to get recommendations</span>
+                    <strong>{{if $.Constraints}}Constraints configured{{else}}Constraints not configured yet{{end}}</strong>
+                    <span>{{if $.Constraints}}Treatment preferences set{{else}}Set treatment preferences{{end}}</span>
+                </div>
+            </div>
+            <div class="progress-item {{if $.ReadyForAnalysis}}completed{{else}}pending{{end}}">
+                <div class="progress-icon">{{if $.ReadyForAnalysis}}✓{{else}}○{{end}}</div>
+                <div class="progress-text">
+                    <strong>{{if $.ReadyForAnalysis}}Ready for acoustic analysis{{else}}Not ready for analysis{{end}}</strong>
+                    <span>{{if $.ReadyForAnalysis}}All required inputs configured{{else}}Requires geometry, sources, and receivers{{end}}</span>
                 </div>
             </div>
         </div>
@@ -108,16 +115,51 @@
 
     <div class="next-steps">
         <h4>Next Steps</h4>
+        {{if not $.Geometry}}
         <p>To continue with your acoustic analysis, configure the room geometry by clicking on the <strong>Geometry</strong> tab above.</p>
         <div class="step-actions">
-            <a href="/hx/projects/{{.Project.ID}}/tabs/geometry" 
-               class="btn btn-primary" 
-               hx-get="/hx/projects/{{.Project.ID}}/tabs/geometry"
+            <a href="/hx/projects/{{$.Project.ID}}/tabs/geometry"
+               class="btn btn-primary"
+               hx-get="/hx/projects/{{$.Project.ID}}/tabs/geometry"
                hx-target="#tab-content"
                hx-swap="innerHTML">
                 Configure Geometry
             </a>
         </div>
+        {{else if not $.Sources}}
+        <p>Geometry is configured. Add sound sources in the <strong>Sources</strong> tab.</p>
+        <div class="step-actions">
+            <a href="/hx/projects/{{$.Project.ID}}/tabs/sources"
+               class="btn btn-primary"
+               hx-get="/hx/projects/{{$.Project.ID}}/tabs/sources"
+               hx-target="#tab-content"
+               hx-swap="innerHTML">
+                Add Sources
+            </a>
+        </div>
+        {{else if not $.Receivers}}
+        <p>Geometry and sources are configured. Add listening positions in the <strong>Receivers</strong> tab.</p>
+        <div class="step-actions">
+            <a href="/hx/projects/{{$.Project.ID}}/tabs/receivers"
+               class="btn btn-primary"
+               hx-get="/hx/projects/{{$.Project.ID}}/tabs/receivers"
+               hx-target="#tab-content"
+               hx-swap="innerHTML">
+                Add Receivers
+            </a>
+        </div>
+        {{else}}
+        <p>All required inputs are configured. You can now run acoustic analysis when available.</p>
+        <div class="step-actions">
+            <a href="/hx/projects/{{$.Project.ID}}/tabs/analysis"
+               class="btn btn-primary"
+               hx-get="/hx/projects/{{$.Project.ID}}/tabs/analysis"
+               hx-target="#tab-content"
+               hx-swap="innerHTML">
+                Run Analysis
+            </a>
+        </div>
+        {{end}}
     </div>
 </div>
 
@@ -205,6 +247,11 @@
 .progress-item.pending {
     background-color: #f8f9fa;
     border-color: var(--border-color);
+}
+
+.progress-item.warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
 }
 
 .progress-icon {

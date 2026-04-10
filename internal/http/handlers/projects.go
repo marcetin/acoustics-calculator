@@ -37,10 +37,10 @@ func (h *ProjectHandler) ListProjects(w http.ResponseWriter, r *http.Request) {
 
 func (h *ProjectHandler) ShowNewProjectForm(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
-		"Title":     "New Project",
+		"Title":      "New Project",
 		"SpaceTypes": domain.ValidSpaceTypes(),
 		"GoalTypes":  domain.ValidGoalTypes(),
-		"Units":     domain.ValidUnits(),
+		"Units":      domain.ValidUnits(),
 	}
 
 	if err := h.app.Templates.ExecuteTemplate(w, "base.html", data); err != nil {
@@ -67,12 +67,12 @@ func (h *ProjectHandler) CreateProject(w http.ResponseWriter, r *http.Request) {
 	project, err := h.app.Services.ProjectService.CreateProject(r.Context(), input)
 	if err != nil {
 		data := map[string]interface{}{
-			"Title":       "New Project",
-			"SpaceTypes":  domain.ValidSpaceTypes(),
-			"GoalTypes":   domain.ValidGoalTypes(),
-			"Units":       domain.ValidUnits(),
-			"Form":        input,
-			"Error":       err.Error(),
+			"Title":      "New Project",
+			"SpaceTypes": domain.ValidSpaceTypes(),
+			"GoalTypes":  domain.ValidGoalTypes(),
+			"Units":      domain.ValidUnits(),
+			"Form":       input,
+			"Error":      err.Error(),
 		}
 
 		w.WriteHeader(http.StatusBadRequest)
@@ -98,10 +98,17 @@ func (h *ProjectHandler) ShowProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	geometry, err := h.app.Services.GeometryService.GetByProjectID(r.Context(), projectID)
+	if err != nil {
+		http.Error(w, "Failed to load geometry", http.StatusInternalServerError)
+		return
+	}
+
 	data := map[string]interface{}{
-		"Title":   project.Name,
-		"Project": project,
-		"Tab":     "summary",
+		"Title":    project.Name,
+		"Project":  project,
+		"Geometry": geometry,
+		"Tab":      "summary",
 	}
 
 	if err := h.app.Templates.ExecuteTemplate(w, "base.html", data); err != nil {
@@ -123,9 +130,125 @@ func (h *ProjectHandler) ShowTab(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	geometry, err := h.app.Services.GeometryService.GetByProjectID(r.Context(), projectID)
+	if err != nil {
+		http.Error(w, "Failed to load geometry", http.StatusInternalServerError)
+		return
+	}
+
 	data := map[string]interface{}{
-		"Project": project,
-		"Tab":     tabName,
+		"Project":  project,
+		"Geometry": geometry,
+		"Tab":      tabName,
+	}
+
+	if tabName == "surfaces" {
+		surfaces, err := h.app.Services.MaterialService.ListProjectSurfaces(r.Context(), projectID)
+		if err != nil {
+			http.Error(w, "Failed to load surfaces", http.StatusInternalServerError)
+			return
+		}
+		materials, err := h.app.Services.MaterialService.ListPresets(r.Context())
+		if err != nil {
+			http.Error(w, "Failed to load materials", http.StatusInternalServerError)
+			return
+		}
+		data["Surfaces"] = surfaces
+		data["Materials"] = materials
+	}
+
+	if tabName == "sources" {
+		sources, err := h.app.Services.SourceService.ListByProject(r.Context(), projectID)
+		if err != nil {
+			http.Error(w, "Failed to load sources", http.StatusInternalServerError)
+			return
+		}
+		data["Sources"] = sources
+	}
+
+	if tabName == "receivers" {
+		receivers, err := h.app.Services.ReceiverService.ListByProject(r.Context(), projectID)
+		if err != nil {
+			http.Error(w, "Failed to load receivers", http.StatusInternalServerError)
+			return
+		}
+		data["Receivers"] = receivers
+	}
+
+	if tabName == "summary" {
+		surfaces, err := h.app.Services.MaterialService.ListProjectSurfaces(r.Context(), projectID)
+		if err != nil {
+			http.Error(w, "Failed to load surfaces", http.StatusInternalServerError)
+			return
+		}
+
+		sources, err := h.app.Services.SourceService.ListByProject(r.Context(), projectID)
+		if err != nil {
+			http.Error(w, "Failed to load sources", http.StatusInternalServerError)
+			return
+		}
+
+		receivers, err := h.app.Services.ReceiverService.ListByProject(r.Context(), projectID)
+		if err != nil {
+			http.Error(w, "Failed to load receivers", http.StatusInternalServerError)
+			return
+		}
+
+		constraints, err := h.app.Services.ConstraintService.GetOrCreateDefault(r.Context(), projectID)
+		if err == nil {
+			data["Constraints"] = constraints
+		}
+
+		materialsAssigned := 0
+		for _, surface := range surfaces {
+			if surface.MaterialID != nil {
+				materialsAssigned++
+			}
+		}
+
+		readyForAnalysis := geometry != nil && len(sources) > 0 && len(receivers) > 0
+
+		data["Surfaces"] = surfaces
+		data["Sources"] = sources
+		data["Receivers"] = receivers
+		data["MaterialsAssigned"] = materialsAssigned
+		data["ReadyForAnalysis"] = readyForAnalysis
+	}
+
+	if tabName == "analysis" {
+		latestRun, err := h.app.Services.AnalysisService.GetLatestRun(r.Context(), projectID)
+		if err == nil && latestRun != nil {
+			metrics, err := latestRun.GetMetrics()
+			if err == nil {
+				data["AnalysisRun"] = latestRun
+				data["AnalysisMetrics"] = metrics
+			}
+		}
+
+		data["Geometry"] = geometry
+		data["ReadyForAnalysis"] = geometry != nil
+	}
+
+	if tabName == "placements" {
+		readiness, err := h.app.Services.PlacementService.CanGeneratePlacements(r.Context(), projectID)
+		if err == nil {
+			data["PlacementReadiness"] = readiness
+		}
+
+		placements, err := h.app.Services.PlacementService.GetLatestPlacements(r.Context(), projectID)
+		if err == nil {
+			data["Placements"] = placements
+		}
+
+		summary, err := h.app.Services.PlacementService.SummarizePlacements(r.Context(), projectID)
+		if err == nil {
+			data["PlacementSummary"] = summary
+		}
+
+		latestRun, err := h.app.Services.AnalysisService.GetLatestRun(r.Context(), projectID)
+		if err == nil && latestRun != nil {
+			data["LatestAnalysisRun"] = latestRun
+		}
 	}
 
 	templateName := "tab_" + tabName + ".html"
