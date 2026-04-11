@@ -12,7 +12,9 @@
 
   let config: SceneConfig | null = null;
   let derivedScene: DerivedScene | null = null;
+  let lastValidScene: DerivedScene | null = null;
   let error: string | null = null;
+  let fieldErrors: Record<string, string> = {};
   let materials = ['gypsum_board', 'painted_concrete', 'wood_panel', 'carpet', 'glass', 'curtain_heavy'];
   let debounceTimer: number | null = null;
 
@@ -31,9 +33,20 @@
     try {
       const response = await previewScene(config);
       derivedScene = response.derived;
+      lastValidScene = response.derived;
       error = null;
+      fieldErrors = {};
     } catch (e) {
+      // Preserve last valid scene
+      if (lastValidScene) {
+        derivedScene = lastValidScene;
+      }
       error = e instanceof Error ? e.message : 'Failed to preview scene';
+      
+      // Extract field errors from error object if available
+      if (e instanceof Error && (e as any).fields) {
+        fieldErrors = (e as any).fields;
+      }
     }
   }
 
@@ -112,6 +125,8 @@
   function resetToExample() {
     getExample().then((example: SceneConfig) => {
       config = example;
+      fieldErrors = {};
+      error = null;
       requestPreview();
     });
   }
@@ -130,6 +145,7 @@
           width={config.room.widthM}
           length={config.room.lengthM}
           height={config.room.heightM}
+          {fieldErrors}
           on:updateWidth={(e) => updateRoomDimension('widthM', e.detail.value)}
           on:updateLength={(e) => updateRoomDimension('lengthM', e.detail.value)}
           on:updateHeight={(e) => updateRoomDimension('heightM', e.detail.value)}
@@ -158,6 +174,7 @@
           rightX={config.sources.right.x}
           rightY={config.sources.right.y}
           rightZ={config.sources.right.z}
+          {fieldErrors}
           on:updateLeftX={(e) => updateSourcePosition('left', 'x', e.detail.value)}
           on:updateLeftY={(e) => updateSourcePosition('left', 'y', e.detail.value)}
           on:updateLeftZ={(e) => updateSourcePosition('left', 'z', e.detail.value)}
@@ -170,6 +187,7 @@
           x={config.receiver.x}
           y={config.receiver.y}
           z={config.receiver.z}
+          {fieldErrors}
           on:updateX={(e) => updateReceiverPosition('x', e.detail.value)}
           on:updateY={(e) => updateReceiverPosition('y', e.detail.value)}
           on:updateZ={(e) => updateReceiverPosition('z', e.detail.value)}

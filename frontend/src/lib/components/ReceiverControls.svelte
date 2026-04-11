@@ -4,6 +4,7 @@
   export let x: number;
   export let y: number;
   export let z: number;
+  export let fieldErrors: Record<string, string> = {};
 
   const dispatch = createEventDispatcher();
 
@@ -21,6 +22,8 @@
     const num = parseFloat(value) || 0;
     dispatch('updateZ', { value: num });
   }
+
+  $: receiverError = fieldErrors['receiver'] || '';
 </script>
 
 <div class="receiver-controls">
@@ -28,16 +31,40 @@
   <div class="control-group">
     <label>
       X (m)
-      <input type="number" step="0.1" min="0" value={x} on:input={(e) => updateX(e.currentTarget.value)} />
+      <input 
+        type="number" 
+        step="0.1" 
+        min="0" 
+        value={x} 
+        on:input={(e) => updateX(e.currentTarget.value)}
+        class:error={receiverError}
+      />
     </label>
     <label>
       Y (m)
-      <input type="number" step="0.1" min="0" value={y} on:input={(e) => updateY(e.currentTarget.value)} />
+      <input 
+        type="number" 
+        step="0.1" 
+        min="0" 
+        value={y} 
+        on:input={(e) => updateY(e.currentTarget.value)}
+        class:error={receiverError}
+      />
     </label>
     <label>
       Z (m)
-      <input type="number" step="0.1" min="0" value={z} on:input={(e) => updateZ(e.currentTarget.value)} />
+      <input 
+        type="number" 
+        step="0.1" 
+        min="0" 
+        value={z} 
+        on:input={(e) => updateZ(e.currentTarget.value)}
+        class:error={receiverError}
+      />
     </label>
+    {#if receiverError}
+      <span class="error-text">{receiverError}</span>
+    {/if}
   </div>
 </div>
 
@@ -70,5 +97,15 @@
   input:focus {
     outline: none;
     border-color: #2196F3;
+  }
+
+  input.error {
+    border-color: #f44336;
+  }
+
+  .error-text {
+    font-size: 0.75rem;
+    color: #f44336;
+    margin-top: 2px;
   }
 </style>

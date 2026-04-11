@@ -86,6 +86,13 @@ export async function previewScene(config: SceneConfig): Promise<PreviewResponse
     body: JSON.stringify(config),
   });
   
+  if (!response.ok) {
+    const errorData: ErrorResponse = await response.json();
+    const error = new Error(errorData.error.message);
+    (error as any).fields = errorData.error.fields || {};
+    throw error;
+  }
+  
   const result: SuccessResponse<PreviewResponse> | ErrorResponse = await response.json();
   
   if (!result.ok) {

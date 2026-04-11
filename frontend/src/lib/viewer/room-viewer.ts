@@ -262,4 +262,56 @@ export class RoomViewer {
     if (!this.derivedScene || !this.controls) return;
     this.fitCameraToRoom(this.derivedScene);
   }
+
+  setPresetView(preset: 'isometric' | 'front' | 'left' | 'top') {
+    if (!this.derivedScene || !this.controls) return;
+
+    const { roomBounds } = this.derivedScene;
+    const centerX = roomBounds.maxX / 2;
+    const centerY = roomBounds.maxY / 2;
+    const centerZ = roomBounds.maxZ / 2;
+    const maxDim = Math.max(roomBounds.maxX, roomBounds.maxY, roomBounds.maxZ);
+    const distance = maxDim * 2.5;
+
+    const target = new THREE.Vector3(centerX, centerY, centerZ);
+    let position: THREE.Vector3;
+
+    switch (preset) {
+      case 'isometric':
+        position = new THREE.Vector3(
+          centerX + distance * 0.7,
+          centerY + distance * 0.7,
+          centerZ + distance * 0.5
+        );
+        break;
+      case 'front':
+        position = new THREE.Vector3(
+          centerX,
+          centerY - distance,
+          centerZ + distance * 0.5
+        );
+        break;
+      case 'left':
+        position = new THREE.Vector3(
+          centerX - distance,
+          centerY,
+          centerZ + distance * 0.5
+        );
+        break;
+      case 'top':
+        position = new THREE.Vector3(
+          centerX,
+          centerY,
+          centerZ + distance
+        );
+        break;
+      default:
+        return;
+    }
+
+    this.camera.position.copy(position);
+    this.camera.lookAt(target);
+    this.controls.target.copy(target);
+    this.controls.update();
+  }
 }

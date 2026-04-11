@@ -7,6 +7,7 @@
   export let rightX: number;
   export let rightY: number;
   export let rightZ: number;
+  export let fieldErrors: Record<string, string> = {};
 
   const dispatch = createEventDispatcher();
 
@@ -39,6 +40,9 @@
     const num = parseFloat(value) || 0;
     dispatch('updateRightZ', { value: num });
   }
+
+  $: leftError = fieldErrors['sources.left'] || fieldErrors['sources'] || '';
+  $: rightError = fieldErrors['sources.right'] || fieldErrors['sources'] || '';
 </script>
 
 <div class="source-controls">
@@ -109,5 +113,15 @@
   input:focus {
     outline: none;
     border-color: #2196F3;
+  }
+
+  input.error {
+    border-color: #f44336;
+  }
+
+  .error-text {
+    font-size: 0.75rem;
+    color: #f44336;
+    margin-top: 2px;
   }
 </style>

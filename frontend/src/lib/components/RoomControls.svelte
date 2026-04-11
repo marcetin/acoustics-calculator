@@ -4,6 +4,7 @@
   export let width: number;
   export let length: number;
   export let height: number;
+  export let fieldErrors: Record<string, string> = {};
 
   const dispatch = createEventDispatcher();
 
@@ -21,6 +22,10 @@
     const num = parseFloat(value) || 0;
     dispatch('updateHeight', { value: num });
   }
+
+  $: widthError = fieldErrors['room.widthM'] || '';
+  $: lengthError = fieldErrors['room.lengthM'] || '';
+  $: heightError = fieldErrors['room.heightM'] || '';
 </script>
 
 <div class="room-controls">
@@ -28,15 +33,45 @@
   <div class="control-group">
     <label>
       Width (m)
-      <input type="number" step="0.1" min="0.1" value={width} on:input={(e) => updateWidth(e.currentTarget.value)} />
+      <input 
+        type="number" 
+        step="0.1" 
+        min="0.1" 
+        value={width} 
+        on:input={(e) => updateWidth(e.currentTarget.value)}
+        class:error={widthError}
+      />
+      {#if widthError}
+        <span class="error-text">{widthError}</span>
+      {/if}
     </label>
     <label>
       Length (m)
-      <input type="number" step="0.1" min="0.1" value={length} on:input={(e) => updateLength(e.currentTarget.value)} />
+      <input 
+        type="number" 
+        step="0.1" 
+        min="0.1" 
+        value={length} 
+        on:input={(e) => updateLength(e.currentTarget.value)}
+        class:error={lengthError}
+      />
+      {#if lengthError}
+        <span class="error-text">{lengthError}</span>
+      {/if}
     </label>
     <label>
       Height (m)
-      <input type="number" step="0.1" min="0.1" value={height} on:input={(e) => updateHeight(e.currentTarget.value)} />
+      <input 
+        type="number" 
+        step="0.1" 
+        min="0.1" 
+        value={height} 
+        on:input={(e) => updateHeight(e.currentTarget.value)}
+        class:error={heightError}
+      />
+      {#if heightError}
+        <span class="error-text">{heightError}</span>
+      {/if}
     </label>
   </div>
 </div>
@@ -70,5 +105,15 @@
   input:focus {
     outline: none;
     border-color: #2196F3;
+  }
+
+  input.error {
+    border-color: #f44336;
+  }
+
+  .error-text {
+    font-size: 0.75rem;
+    color: #f44336;
+    margin-top: 2px;
   }
 </style>
